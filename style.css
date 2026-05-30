@@ -1,0 +1,162 @@
+:root{
+    --primary:#8B5CF6;
+    --secondary:#EC4899;
+    --dark:#1F2937;
+    --light:#FFFFFF;
+    --border:#E5E7EB;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI, sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(
+        135deg,
+        var(--primary),
+        var(--secondary)
+    );
+}
+
+.container{
+    min-height:100vh;
+    display:flex;
+}
+
+.left-panel{
+    flex:1;
+    color:white;
+    padding:60px;
+}
+
+.right-panel{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.login-card,
+.forgot-card{
+    width:100%;
+    max-width:500px;
+    background:white;
+    border-radius:20px;
+    padding:40px;
+    box-shadow:0 20px 40px rgba(0,0,0,.15);
+}
+
+.client-logo{
+    width:80px;
+    display:block;
+    margin:auto;
+}
+
+h2{
+    text-align:center;
+    color:var(--dark);
+    margin-top:15px;
+}
+
+.portal-title{
+    text-align:center;
+    margin-bottom:30px;
+    color:#6B7280;
+}
+
+.field{
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:10px;
+}
+
+.options{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.login-btn{
+    width:100%;
+    border:none;
+    padding:15px;
+    border-radius:10px;
+    color:white;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+
+    background:linear-gradient(
+        135deg,
+        var(--primary),
+        var(--secondary)
+    );
+}
+
+.powered-by{
+    margin-top:30px;
+    text-align:center;
+}
+
+.logo-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+}
+
+.paynest-logo{
+    width:40px;
+}
+
+.copyright{
+    margin-top:10px;
+    font-size:12px;
+    color:#6B7280;
+}
+
+.error{
+    color:red;
+    font-size:12px;
+}
+
+.password-container{
+    position:relative;
+}
+
+.eye-btn{
+    position:absolute;
+    right:10px;
+    top:10px;
+    border:none;
+    background:none;
+    cursor:pointer;
+}
+
+@media(max-width:900px){
+
+    .left-panel{
+        display:none;
+    }
+
+    .right-panel{
+        flex:1;
+    }
+}
