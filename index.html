@@ -8,7 +8,7 @@
 
     <link rel="stylesheet" href="style.css">
 </head>
-    
+
 <body>
 
     <div class="container">
@@ -17,28 +17,22 @@
 
         <div class="left-panel">
 
-            <div class="brand-section">
+            <h1>
+                Smart Payroll Management
+                for Modern Businesses
+            </h1>
 
-                <h1>
-                    Smart Payroll Management
-                    for Modern Businesses
-                </h1>
-
-                <p>
-                    Streamline payroll operations,
-                    empower your employees and
-                    grow your organization.
-                </p>
-
-            </div>
+            <p>
+                Streamline payroll operations,
+                manage your workforce and
+                simplify salary processing.
+            </p>
 
             <div class="features">
-
                 <div>✓ Employee Management</div>
                 <div>✓ Payroll Processing</div>
                 <div>✓ Reports & Analytics</div>
                 <div>✓ Security & Compliance</div>
-
             </div>
 
         </div>
@@ -49,9 +43,9 @@
 
             <div class="login-card">
 
-                <img src="assets/logos/abc-logo.svg"
-                     alt="ABC Ltd"
-                     class="client-logo">
+                <div class="client-logo">
+                    ABC
+                </div>
 
                 <h2>ABC Ltd.</h2>
 
@@ -68,9 +62,12 @@
                         <input
                             type="text"
                             id="username"
-                            placeholder="Enter your username">
+                            placeholder="Enter username">
 
-                        <small class="error" id="usernameError"></small>
+                        <small
+                            class="error"
+                            id="usernameError">
+                        </small>
 
                     </div>
 
@@ -83,28 +80,23 @@
                             <input
                                 type="password"
                                 id="password"
-                                placeholder="Enter your password">
+                                placeholder="Enter password">
 
                             <button
                                 type="button"
                                 class="eye-btn"
                                 onclick="togglePassword()">
 
-                                <svg width="20" height="20" viewBox="0 0 24 24">
-                                    <path fill="currentColor"
-                                          d="M12 5C7 5 2.73 8.11 1 12
-                                          c1.73 3.89 6 7 11 7
-                                          s9.27-3.11 11-7
-                                          c-1.73-3.89-6-7-11-7zm0 12
-                                          a5 5 0 1 1 0-10
-                                          a5 5 0 0 1 0 10z"/>
-                                </svg>
+                                👁
 
                             </button>
 
                         </div>
 
-                        <small class="error" id="passwordError"></small>
+                        <small
+                            class="error"
+                            id="passwordError">
+                        </small>
 
                     </div>
 
@@ -118,7 +110,7 @@
 
                         </label>
 
-                        <a href="pages/forgot-password.html">
+                        <a href="forgot-password.html">
                             Forgot Password?
                         </a>
 
@@ -139,11 +131,9 @@
 
                     <div class="logo-row">
 
-                        <img src="assets/logos/paynest-logo.svg"
-                             alt="PayNest Logo"
-                             class="paynest-logo">
-
-                        <span>Powered by PayNest</span>
+                        <span>
+                            Powered by PayNest
+                        </span>
 
                     </div>
 
@@ -162,7 +152,7 @@
 
     </div>
 
-    <script src="js/app.js"></script>
-<script src="app.js"></script>
+    <script src="app.js"></script>
+
 </body>
 </html>
