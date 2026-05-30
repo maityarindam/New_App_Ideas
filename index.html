@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,142 +10,56 @@
 
 <body>
 
-<div class="container">
+    <div class="main-container">
 
-    <div class="left-panel">
+        <!-- LEFT PANEL -->
 
-        <div class="illustration-card">
+        <div class="left-panel">
 
-            <div class="paynest-big-logo">
-                🪺₹
-            </div>
+            <div class="left-content">
 
-            <h1>PayNest</h1>
+                <img
+                    src="assets/logos/paynest-logo.svg"
+                    alt="PayNest"
+                    class="paynest-logo-large">
 
-            <p class="tagline">
-                Nest Your Workforce
-            </p>
+                <h1>
+                    Smart Payroll Management
+                    for Modern Businesses
+                </h1>
 
-            <div class="feature-list">
+                <p class="hero-text">
+                    Streamline payroll operations,
+                    manage employee data and
+                    ensure compliance with ease.
+                </p>
 
-                <div>✓ Employee Management</div>
-                <div>✓ Payroll Processing</div>
-                <div>✓ Salary Registers</div>
-                <div>✓ Reports & Analytics</div>
-                <div>✓ Compliance & Security</div>
+                <img
+                    src="assets/illustrations/payroll-illustration.svg"
+                    alt="Payroll Illustration"
+                    class="illustration">
 
-            </div>
+                <div class="feature-grid">
 
-        </div>
-
-    </div>
-
-    <div class="right-panel">
-
-        <div class="login-card">
-
-            <div class="client-logo">
-                ABC
-            </div>
-
-            <h2>ABC Ltd.</h2>
-
-            <p class="portal-title">
-                Payroll Administration Portal
-            </p>
-
-            <form id="loginForm">
-
-                <div class="field">
-
-                    <label>Username</label>
-
-                    <input
-                        type="text"
-                        id="username"
-                        placeholder="Enter username">
-
-                    <small
-                        id="usernameError"
-                        class="error">
-                    </small>
-
-                </div>
-
-                <div class="field">
-
-                    <label>Password</label>
-
-                    <div class="password-container">
-
-                        <input
-                            type="password"
-                            id="password"
-                            placeholder="Enter password">
-
-                        <button
-                            type="button"
-                            class="eye-btn"
-                            onclick="togglePassword()">
-
-                            👁
-
-                        </button>
-
+                    <div class="feature-card">
+                        <span>👥</span>
+                        <p>Employee Management</p>
                     </div>
 
-                    <small
-                        id="passwordError"
-                        class="error">
-                    </small>
-
-                </div>
-
-                <div class="options">
-
-                    <label class="remember">
-
-                        <input type="checkbox">
-
-                        Remember Me
-
-                    </label>
-
-                    <a href="forgot-password.html">
-                        Forgot Password?
-                    </a>
-
-                </div>
-
-                <button
-                    type="submit"
-                    id="loginBtn"
-                    class="login-btn">
-
-                    Sign In
-
-                </button>
-
-            </form>
-
-            <div class="powered-by">
-
-                <div class="logo-row">
-
-                    <div class="mini-logo">
-                        🪺₹
+                    <div class="feature-card">
+                        <span>💰</span>
+                        <p>Payroll Processing</p>
                     </div>
 
-                    <span>
-                        Powered by PayNest
-                    </span>
+                    <div class="feature-card">
+                        <span>📊</span>
+                        <p>Reports & Analytics</p>
+                    </div>
 
-                </div>
-
-                <div class="copyright">
-
-                    © 2026 PayNest Technologies.
-                    All rights reserved.
+                    <div class="feature-card">
+                        <span>🔒</span>
+                        <p>Security & Compliance</p>
+                    </div>
 
                 </div>
 
@@ -152,11 +67,161 @@
 
         </div>
 
+        <!-- RIGHT PANEL -->
+
+        <div class="right-panel">
+
+            <div class="login-card">
+
+                <div class="company-section">
+
+                    <img
+                        src="assets/logos/abc-logo.svg"
+                        alt="ABC Ltd"
+                        class="company-logo">
+
+                    <h2>ABC Ltd.</h2>
+
+                    <p class="portal-title">
+                        Payroll Administration Portal
+                    </p>
+
+                    <div class="title-divider"></div>
+
+                </div>
+
+                <form id="loginForm">
+
+                    <div class="input-group">
+
+                        <label>Username</label>
+
+                        <div class="input-wrapper">
+
+                            <img
+                                src="assets/icons/user.svg"
+                                alt="User">
+
+                            <input
+                                type="text"
+                                id="username"
+                                placeholder="Enter your username">
+
+                        </div>
+
+                        <small
+                            id="usernameError"
+                            class="error">
+                        </small>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <label>Password</label>
+
+                        <div class="input-wrapper">
+
+                            <img
+                                src="assets/icons/lock.svg"
+                                alt="Lock">
+
+                            <input
+                                type="password"
+                                id="password"
+                                placeholder="Enter your password">
+
+                            <button
+                                type="button"
+                                class="eye-button"
+                                onclick="togglePassword()">
+
+                                <img
+                                    src="assets/icons/eye.svg"
+                                    alt="Show Password">
+
+                            </button>
+
+                        </div>
+
+                        <small
+                            id="passwordError"
+                            class="error">
+                        </small>
+
+                    </div>
+
+                    <div class="login-options">
+
+                        <label class="remember-me">
+
+                            <input type="checkbox">
+
+                            Remember Me
+
+                        </label>
+
+                        <a href="forgot-password.html">
+                            Forgot Password?
+                        </a>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        id="loginBtn"
+                        class="sign-in-btn">
+
+                        <span>Sign In</span>
+
+                        <span class="arrow">
+                            →
+                        </span>
+
+                    </button>
+
+                </form>
+
+                <div class="footer-branding">
+
+                    <p class="powered-text">
+                        Powered by
+                    </p>
+
+                    <div class="brand-row">
+
+                        <img
+                            src="assets/logos/paynest-logo.svg"
+                            alt="PayNest"
+                            class="footer-logo">
+
+                        <span class="footer-divider">
+                            |
+                        </span>
+
+                        <span class="footer-tagline">
+                            Nest Your Workforce
+                        </span>
+
+                    </div>
+
+                    <p class="copyright">
+
+                        © 2026 PayNest Technologies.
+                        All rights reserved.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
-</div>
-
-<script src="app.js"></script>
+    <script src="app.js"></script>
 
 </body>
+
 </html>
