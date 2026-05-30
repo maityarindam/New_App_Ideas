@@ -1,28 +1,37 @@
-function togglePassword(){
+// ======================
+// SHOW / HIDE PASSWORD
+// ======================
+
+function togglePassword() {
 
     const password =
         document.getElementById("password");
 
-    if(password.type === "password"){
+    if (!password) return;
+
+    if (password.type === "password") {
         password.type = "text";
-    }
-    else{
+    } else {
         password.type = "password";
     }
 }
 
+// ======================
+// LOGIN VALIDATION
+// ======================
+
 document.addEventListener(
     "DOMContentLoaded",
-    function(){
+    function () {
 
-        const form =
+        const loginForm =
             document.getElementById("loginForm");
 
-        if(!form) return;
+        if (!loginForm) return;
 
-        form.addEventListener(
+        loginForm.addEventListener(
             "submit",
-            function(e){
+            function (e) {
 
                 e.preventDefault();
 
@@ -43,42 +52,86 @@ document.addEventListener(
                 usernameError.textContent = "";
                 passwordError.textContent = "";
 
-                if(username.value.trim()===""){
+                if (username.value.trim() === "") {
+
                     usernameError.textContent =
                         "Username is required";
+
                     valid = false;
                 }
 
-                if(password.value.trim()===""){
+                if (password.value.trim() === "") {
+
                     passwordError.textContent =
                         "Password is required";
+
                     valid = false;
                 }
 
-                if(valid){
+                if (
+                    password.value.trim() !== "" &&
+                    password.value.length < 8
+                ) {
+
+                    passwordError.textContent =
+                        "Password must be at least 8 characters";
+
+                    valid = false;
+                }
+
+                if (valid) {
 
                     const btn =
                         document.getElementById("loginBtn");
 
-                    btn.innerHTML =
-                        "Signing In...";
-
                     btn.disabled = true;
 
-                    setTimeout(function(){
+                    btn.innerHTML =
+                        "⏳ Signing In...";
+
+                    setTimeout(function () {
 
                         alert(
-                            "Dashboard page coming next."
+                            "Login successful. Dashboard coming in Phase 2."
                         );
+
+                        btn.disabled = false;
 
                         btn.innerHTML =
                             "Sign In";
 
-                        btn.disabled = false;
-
-                    },1500);
+                    }, 1500);
                 }
             }
         );
     }
 );
+
+// ======================
+// FORGOT PASSWORD
+// ======================
+
+function sendResetLink() {
+
+    const username =
+        document.getElementById("forgotUsername");
+
+    const email =
+        document.getElementById("forgotEmail");
+
+    if (
+        !username.value.trim() ||
+        !email.value.trim()
+    ) {
+
+        alert(
+            "Please enter username and registered email."
+        );
+
+        return;
+    }
+
+    alert(
+        "Password reset link has been sent."
+    );
+}
