@@ -1,167 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PayNest - Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+<title>PayNest | Login</title>
 
-        body{
-            background:#F8FAFC;
-            min-height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            padding:20px;
-        }
+<style>
 
-        .login-container{
-            width:100%;
-            max-width:420px;
-            background:#ffffff;
-            padding:40px;
-            border-radius:16px;
-            box-shadow:0 10px 30px rgba(0,0,0,0.08);
-        }
+:root{
+    --primary:#EA580C;
+    --primary-hover:#C2410C;
+    --accent:#F59E0B;
+    --text:#1F2937;
+    --border:#E7E5E4;
+    --bg:#FFFDF8;
+    --white:#FFFFFF;
+}
 
-        .logo{
-            text-align:center;
-            margin-bottom:30px;
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-        .logo-icon{
-            width:60px;
-            height:60px;
-            background:#2563EB;
-            color:white;
-            border-radius:12px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            margin:0 auto 15px;
-            font-size:28px;
-            font-weight:bold;
-        }
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background:linear-gradient(
+        135deg,
+        #EA580C,
+        #F59E0B
+    );
+}
 
-        .logo h1{
-            color:#0F172A;
-            font-size:30px;
-            margin-bottom:5px;
-        }
+.login-card{
+    width:100%;
+    max-width:440px;
+    background:var(--white);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 20px 45px rgba(0,0,0,0.15);
+}
 
-        .logo p{
-            color:#64748B;
-            font-size:14px;
-        }
+.card-body{
+    padding:40px;
+}
 
-        .form-group{
-            margin-bottom:20px;
-        }
+.client-logo{
+    width:90px;
+    height:90px;
+    margin:auto;
+    border:2px dashed var(--border);
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#6B7280;
+    font-size:12px;
+    text-align:center;
+    padding:10px;
+}
 
-        label{
-            display:block;
-            margin-bottom:8px;
-            color:#334155;
-            font-weight:500;
-        }
+.company-name{
+    margin-top:18px;
+    text-align:center;
+    color:var(--text);
+    font-size:24px;
+    font-weight:700;
+}
 
-        input{
-            width:100%;
-            padding:14px;
-            border:1px solid #CBD5E1;
-            border-radius:10px;
-            font-size:15px;
-            outline:none;
-            transition:0.3s;
-        }
+.portal-title{
+    text-align:center;
+    color:#6B7280;
+    margin-top:8px;
+    margin-bottom:35px;
+    font-size:14px;
+}
 
-        input:focus{
-            border-color:#2563EB;
-        }
+.form-group{
+    margin-bottom:20px;
+}
 
-        .password-wrapper{
-            position:relative;
-        }
+label{
+    display:block;
+    margin-bottom:8px;
+    color:var(--text);
+    font-size:14px;
+    font-weight:600;
+}
 
-        .show-password{
-            position:absolute;
-            right:15px;
-            top:50%;
-            transform:translateY(-50%);
-            cursor:pointer;
-            color:#64748B;
-            font-size:14px;
-        }
+input[type="text"],
+input[type="password"]{
+    width:100%;
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    outline:none;
+    font-size:15px;
+}
 
-        .remember{
-            display:flex;
-            align-items:center;
-            gap:10px;
-            margin-bottom:25px;
-        }
+input:focus{
+    border-color:var(--primary);
+}
 
-        .remember input{
-            width:auto;
-        }
+.password-wrapper{
+    position:relative;
+}
 
-        .login-btn{
-            width:100%;
-            background:#2563EB;
-            color:white;
-            border:none;
-            padding:15px;
-            border-radius:10px;
-            font-size:16px;
-            font-weight:600;
-            cursor:pointer;
-            transition:0.3s;
-        }
+.eye{
+    position:absolute;
+    right:15px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    font-size:18px;
+}
 
-        .login-btn:hover{
-            background:#1D4ED8;
-        }
+.options{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+    flex-wrap:wrap;
+    gap:10px;
+}
 
-        .footer{
-            text-align:center;
-            margin-top:25px;
-            color:#94A3B8;
-            font-size:13px;
-        }
+.remember{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--text);
+    font-size:14px;
+}
 
-        @media(max-width:480px){
+.forgot-password{
+    color:var(--primary);
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+}
 
-            .login-container{
-                padding:25px;
-            }
+.forgot-password:hover{
+    color:var(--primary-hover);
+}
 
-            .logo h1{
-                font-size:26px;
-            }
-        }
-    </style>
+.login-btn{
+    width:100%;
+    border:none;
+    background:var(--primary);
+    color:white;
+    padding:15px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:700;
+    transition:.3s;
+}
+
+.login-btn:hover{
+    background:var(--primary-hover);
+}
+
+.footer{
+    background:#FFF8F1;
+    border-top:1px solid var(--border);
+    text-align:center;
+    padding:25px;
+}
+
+.powered-by{
+    color:#6B7280;
+    font-size:12px;
+    margin-bottom:12px;
+}
+
+.paynest-logo{
+    width:50px;
+    height:50px;
+    margin:auto;
+    background:var(--primary);
+    color:white;
+    border-radius:12px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.paynest-name{
+    margin-top:10px;
+    color:var(--text);
+    font-size:18px;
+    font-weight:700;
+}
+
+.tagline{
+    margin-top:5px;
+    color:#6B7280;
+    font-size:13px;
+}
+
+.version{
+    margin-top:15px;
+    color:#9CA3AF;
+    font-size:12px;
+}
+
+@media(max-width:480px){
+
+    .card-body{
+        padding:25px;
+    }
+
+    .company-name{
+        font-size:20px;
+    }
+
+    .options{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+}
+
+</style>
 </head>
+
 <body>
 
-<div class="login-container">
+<div class="login-card">
 
-    <div class="logo">
-        <div class="logo-icon">P</div>
-        <h1>PayNest</h1>
-        <p>Payroll Made Simple</p>
-    </div>
+    <div class="card-body">
 
-    <form>
+        <div class="client-logo">
+            CLIENT<br>LOGO
+        </div>
+
+        <div class="company-name">
+            Company Name
+        </div>
+
+        <div class="portal-title">
+            Payroll Administration
+        </div>
 
         <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" placeholder="Enter your email">
+            <label>Username</label>
+            <input type="text" placeholder="Enter your username">
         </div>
 
         <div class="form-group">
@@ -169,23 +259,51 @@
 
             <div class="password-wrapper">
                 <input type="password" id="password" placeholder="Enter your password">
-                <span class="show-password" onclick="togglePassword()">Show</span>
+                <span class="eye" onclick="togglePassword()">👁</span>
             </div>
         </div>
 
-        <div class="remember">
-            <input type="checkbox">
-            <span>Remember Me</span>
+        <div class="options">
+
+            <label class="remember">
+                <input type="checkbox">
+                Remember Me
+            </label>
+
+            <a href="#" class="forgot-password">
+                Forgot Password?
+            </a>
+
         </div>
 
-        <button type="button" class="login-btn" onclick="login()">
-            Login
+        <button class="login-btn" onclick="login()">
+            LOGIN
         </button>
 
-    </form>
+    </div>
 
     <div class="footer">
-        © 2026 PayNest Technologies
+
+        <div class="powered-by">
+            Powered by
+        </div>
+
+        <div class="paynest-logo">
+            P
+        </div>
+
+        <div class="paynest-name">
+            PayNest
+        </div>
+
+        <div class="tagline">
+            Nest Your Workforce
+        </div>
+
+        <div class="version">
+            Version 1.0.0
+        </div>
+
     </div>
 
 </div>
@@ -194,17 +312,18 @@
 
 function togglePassword(){
 
-    const password = document.getElementById('password');
+    const password =
+        document.getElementById("password");
 
-    if(password.type === 'password'){
-        password.type = 'text';
+    if(password.type === "password"){
+        password.type = "text";
     }else{
-        password.type = 'password';
+        password.type = "password";
     }
 }
 
 function login(){
-    alert('Login functionality will be added later.');
+    alert("Dashboard integration coming next.");
 }
 
 </script>
