@@ -1,148 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PayNest | Login</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <!-- Left Panel -->
+    <div class="left-panel">
 
-        <div class="left-panel">
+        <div class="illustration-card">
 
-            <h1>
-                Smart Payroll Management
-                for Modern Businesses
-            </h1>
+            <div class="paynest-big-logo">
+                🪺₹
+            </div>
 
-            <p>
-                Streamline payroll operations,
-                manage your workforce and
-                simplify salary processing.
+            <h1>PayNest</h1>
+
+            <p class="tagline">
+                Nest Your Workforce
             </p>
 
-            <div class="features">
+            <div class="feature-list">
+
                 <div>✓ Employee Management</div>
                 <div>✓ Payroll Processing</div>
+                <div>✓ Salary Registers</div>
                 <div>✓ Reports & Analytics</div>
-                <div>✓ Security & Compliance</div>
+                <div>✓ Compliance & Security</div>
+
             </div>
 
         </div>
 
-        <!-- Right Panel -->
+    </div>
 
-        <div class="right-panel">
+    <div class="right-panel">
 
-            <div class="login-card">
+        <div class="login-card">
 
-                <div class="client-logo">
-                    ABC
+            <div class="client-logo">
+                ABC
+            </div>
+
+            <h2>ABC Ltd.</h2>
+
+            <p class="portal-title">
+                Payroll Administration Portal
+            </p>
+
+            <form id="loginForm">
+
+                <div class="field">
+
+                    <label>Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        placeholder="Enter username">
+
+                    <small
+                        id="usernameError"
+                        class="error">
+                    </small>
+
                 </div>
 
-                <h2>ABC Ltd.</h2>
+                <div class="field">
 
-                <p class="portal-title">
-                    Payroll Administration Portal
-                </p>
+                    <label>Password</label>
 
-                <form id="loginForm">
-
-                    <div class="field">
-
-                        <label>Username</label>
+                    <div class="password-container">
 
                         <input
-                            type="text"
-                            id="username"
-                            placeholder="Enter username">
+                            type="password"
+                            id="password"
+                            placeholder="Enter password">
 
-                        <small
-                            class="error"
-                            id="usernameError">
-                        </small>
+                        <button
+                            type="button"
+                            class="eye-btn"
+                            onclick="togglePassword()">
 
-                    </div>
+                            👁
 
-                    <div class="field">
-
-                        <label>Password</label>
-
-                        <div class="password-container">
-
-                            <input
-                                type="password"
-                                id="password"
-                                placeholder="Enter password">
-
-                            <button
-                                type="button"
-                                class="eye-btn"
-                                onclick="togglePassword()">
-
-                                👁
-
-                            </button>
-
-                        </div>
-
-                        <small
-                            class="error"
-                            id="passwordError">
-                        </small>
+                        </button>
 
                     </div>
 
-                    <div class="options">
+                    <small
+                        id="passwordError"
+                        class="error">
+                    </small>
 
-                        <label class="remember">
+                </div>
 
-                            <input type="checkbox">
+                <div class="options">
 
-                            Remember Me
+                    <label class="remember">
 
-                        </label>
+                        <input type="checkbox">
 
-                        <a href="forgot-password.html">
-                            Forgot Password?
-                        </a>
+                        Remember Me
 
+                    </label>
+
+                    <a href="forgot-password.html">
+                        Forgot Password?
+                    </a>
+
+                </div>
+
+                <button
+                    type="submit"
+                    id="loginBtn"
+                    class="login-btn">
+
+                    Sign In
+
+                </button>
+
+            </form>
+
+            <div class="powered-by">
+
+                <div class="logo-row">
+
+                    <div class="mini-logo">
+                        🪺₹
                     </div>
 
-                    <button
-                        type="submit"
-                        id="loginBtn"
-                        class="login-btn">
+                    <span>
+                        Powered by PayNest
+                    </span>
 
-                        Sign In
+                </div>
 
-                    </button>
+                <div class="copyright">
 
-                </form>
-
-                <div class="powered-by">
-
-                    <div class="logo-row">
-
-                        <span>
-                            Powered by PayNest
-                        </span>
-
-                    </div>
-
-                    <div class="copyright">
-
-                        © 2026 PayNest Technologies.
-                        All rights reserved.
-
-                    </div>
+                    © 2026 PayNest Technologies.
+                    All rights reserved.
 
                 </div>
 
@@ -152,7 +154,9 @@
 
     </div>
 
-    <script src="app.js"></script>
+</div>
+
+<script src="app.js"></script>
 
 </body>
 </html>
