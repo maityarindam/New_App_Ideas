@@ -1,266 +1,398 @@
+/* ==========================
+   PAYNEST DESIGN SYSTEM
+========================== */
+
 :root{
     --primary:#7C3AED;
     --secondary:#EC4899;
-    --dark:#1F2937;
-    --light:#FFFFFF;
+    --primary-light:#A855F7;
+    --background:#F8FAFC;
+    --white:#FFFFFF;
+    --text:#1F2937;
+    --muted:#6B7280;
     --border:#E5E7EB;
-    --text:#6B7280;
+    --success:#10B981;
 }
+
+/* ==========================
+   RESET
+========================== */
 
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Segoe UI, sans-serif;
+    font-family:"Segoe UI",sans-serif;
 }
 
 body{
     min-height:100vh;
     background:linear-gradient(
         135deg,
-        var(--primary),
-        var(--secondary)
+        #7C3AED 0%,
+        #EC4899 100%
     );
 }
 
-/* =======================
-   LOGIN PAGE
-======================= */
+/* ==========================
+   LOGIN PAGE LAYOUT
+========================== */
 
-.container{
+.main-container{
     min-height:100vh;
     display:flex;
 }
 
+/* ==========================
+   LEFT PANEL
+========================== */
+
 .left-panel{
-    flex:1;
+    width:55%;
+    padding:50px;
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:50px;
 }
+
+.left-content{
+    max-width:620px;
+    color:white;
+}
+
+.paynest-logo-large{
+    width:220px;
+    margin-bottom:35px;
+}
+
+.left-content h1{
+    font-size:48px;
+    line-height:1.2;
+    margin-bottom:20px;
+    font-weight:700;
+}
+
+.hero-text{
+    font-size:18px;
+    line-height:1.7;
+    opacity:.95;
+    margin-bottom:35px;
+}
+
+.illustration{
+    width:100%;
+    max-width:500px;
+    margin-bottom:35px;
+}
+
+.feature-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.feature-card{
+    background:rgba(255,255,255,.12);
+    backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:18px;
+    padding:18px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.feature-card span{
+    font-size:24px;
+}
+
+.feature-card p{
+    font-size:15px;
+}
+
+/* ==========================
+   RIGHT PANEL
+========================== */
 
 .right-panel{
-    flex:1;
+    width:45%;
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
     padding:30px;
-}
-
-.illustration-card{
-    color:white;
-    max-width:450px;
-}
-
-.paynest-big-logo{
-    font-size:90px;
-    margin-bottom:20px;
-}
-
-.illustration-card h1{
-    font-size:52px;
-    margin-bottom:10px;
-}
-
-.tagline{
-    font-size:22px;
-    opacity:.9;
-    margin-bottom:40px;
-}
-
-.feature-list{
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-    font-size:18px;
 }
 
 .login-card,
 .forgot-card{
     width:100%;
-    max-width:480px;
+    max-width:520px;
     background:white;
-    border-radius:24px;
+    border-radius:28px;
     padding:40px;
-    box-shadow:0 20px 60px rgba(0,0,0,.18);
+    box-shadow:
+    0 20px 60px rgba(0,0,0,.15);
 }
 
-.client-logo{
-    width:80px;
-    height:80px;
-    margin:auto;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:700;
-    color:white;
+/* ==========================
+   COMPANY
+========================== */
+
+.company-section{
+    text-align:center;
+}
+
+.company-logo{
+    width:90px;
+    margin-bottom:15px;
+}
+
+.company-section h2{
+    color:var(--text);
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.portal-title{
+    color:var(--muted);
+    font-size:15px;
+}
+
+.title-divider{
+    width:70px;
+    height:4px;
+    border-radius:50px;
+    margin:18px auto 30px;
+
     background:linear-gradient(
-        135deg,
+        90deg,
         var(--primary),
         var(--secondary)
     );
 }
 
-h2{
-    text-align:center;
-    margin-top:18px;
-    color:var(--dark);
-    font-size:32px;
-}
+/* ==========================
+   FORM
+========================== */
 
-.portal-title{
-    text-align:center;
-    color:var(--text);
-    margin-top:10px;
-    margin-bottom:30px;
-    font-size:18px;
-}
-
-.field{
+.input-group{
     margin-bottom:22px;
 }
 
-label{
+.input-group label{
     display:block;
     margin-bottom:8px;
     font-weight:600;
-    color:var(--dark);
+    color:var(--text);
 }
 
-input{
-    width:100%;
-    padding:16px;
+.input-wrapper{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
     border:1px solid var(--border);
     border-radius:14px;
-    font-size:16px;
+    padding:14px 16px;
+    background:white;
 }
 
-input:focus{
+.input-wrapper img{
+    width:20px;
+    height:20px;
+}
+
+.input-wrapper input{
+    border:none;
     outline:none;
+    flex:1;
+    font-size:15px;
+}
+
+.input-wrapper:focus-within{
     border-color:var(--primary);
+    box-shadow:
+    0 0 0 4px rgba(124,58,237,.08);
 }
 
-.password-container{
-    position:relative;
-}
-
-.eye-btn{
-    position:absolute;
-    right:14px;
-    top:50%;
-    transform:translateY(-50%);
+.eye-button{
     border:none;
     background:none;
     cursor:pointer;
-    font-size:20px;
 }
 
-.options{
+.eye-button img{
+    width:18px;
+    height:18px;
+}
+
+.error{
+    display:block;
+    color:#EF4444;
+    margin-top:6px;
+    font-size:13px;
+}
+
+/* ==========================
+   OPTIONS
+========================== */
+
+.login-options{
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:25px;
 }
 
-.options a{
-    color:var(--primary);
-    text-decoration:none;
-    font-weight:600;
-}
-
-.remember{
+.remember-me{
     display:flex;
     align-items:center;
     gap:8px;
+    font-size:14px;
+    color:var(--muted);
 }
 
-.remember input{
-    width:auto;
+.login-options a{
+    text-decoration:none;
+    color:var(--primary);
+    font-size:14px;
+    font-weight:600;
 }
 
-.login-btn{
+/* ==========================
+   BUTTON
+========================== */
+
+.sign-in-btn{
     width:100%;
     border:none;
-    padding:16px;
-    border-radius:14px;
-    font-size:18px;
-    font-weight:700;
-    color:white;
     cursor:pointer;
-    transition:.3s;
+
+    padding:16px 20px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+
+    border-radius:14px;
+
+    color:white;
+    font-size:16px;
+    font-weight:700;
 
     background:linear-gradient(
         135deg,
         var(--primary),
         var(--secondary)
     );
+
+    transition:.3s;
 }
 
-.login-btn:hover{
+.sign-in-btn:hover{
     transform:translateY(-2px);
 }
 
-.powered-by{
-    margin-top:35px;
+.arrow{
+    font-size:18px;
+}
+
+/* ==========================
+   FOOTER
+========================== */
+
+.footer-branding{
     text-align:center;
+    margin-top:35px;
 }
 
-.logo-row{
+.powered-text{
+    color:var(--muted);
+    font-size:14px;
+    margin-bottom:12px;
+}
+
+.brand-row{
     display:flex;
-    align-items:center;
     justify-content:center;
-    gap:10px;
-    font-weight:600;
+    align-items:center;
+    gap:12px;
 }
 
-.mini-logo{
-    font-size:22px;
+.footer-logo{
+    width:140px;
+}
+
+.footer-divider{
+    color:#D1D5DB;
+}
+
+.footer-tagline{
+    color:var(--muted);
+    font-size:14px;
 }
 
 .copyright{
-    margin-top:10px;
+    margin-top:12px;
+    color:var(--muted);
     font-size:12px;
-    color:var(--text);
 }
 
-.error{
-    color:red;
-    font-size:12px;
-    display:block;
-    margin-top:6px;
-}
+/* ==========================
+   FORGOT PASSWORD
+========================== */
 
-.forgot-wrapper{
+.forgot-page{
     min-height:100vh;
     display:flex;
-    align-items:center;
     justify-content:center;
-    padding:20px;
+    align-items:center;
+    padding:30px;
 }
 
 .back-link{
     text-decoration:none;
     color:var(--primary);
     font-weight:600;
+    display:inline-block;
+    margin-bottom:20px;
 }
 
-h3{
-    margin-top:20px;
-    margin-bottom:10px;
-    color:var(--dark);
-}
-
-.forgot-text{
-    color:var(--text);
+.forgot-header{
+    text-align:center;
     margin-bottom:25px;
-    line-height:1.5;
 }
 
-/* =======================
+.lock-icon-large{
+    font-size:42px;
+    margin-bottom:10px;
+}
+
+.forgot-header h3{
+    font-size:28px;
+    color:var(--text);
+    margin-bottom:10px;
+}
+
+.forgot-description{
+    color:var(--muted);
+    line-height:1.6;
+}
+
+/* ==========================
    MOBILE
-======================= */
+========================== */
+
+@media(max-width:1024px){
+
+    .left-content h1{
+        font-size:40px;
+    }
+
+    .feature-grid{
+        grid-template-columns:1fr;
+    }
+}
 
 @media(max-width:900px){
 
@@ -269,19 +401,29 @@ h3{
     }
 
     .right-panel{
-        flex:1;
+        width:100%;
     }
 
     .login-card,
     .forgot-card{
+        max-width:100%;
         padding:28px;
     }
 
-    h2{
-        font-size:26px;
+    .company-logo{
+        width:75px;
     }
 
-    .portal-title{
-        font-size:16px;
+    .company-section h2{
+        font-size:24px;
+    }
+
+    .brand-row{
+        flex-direction:column;
+        gap:6px;
+    }
+
+    .footer-divider{
+        display:none;
     }
 }
