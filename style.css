@@ -1,9 +1,10 @@
 :root{
-    --primary:#8B5CF6;
+    --primary:#7C3AED;
     --secondary:#EC4899;
     --dark:#1F2937;
     --light:#FFFFFF;
     --border:#E5E7EB;
+    --text:#6B7280;
 }
 
 *{
@@ -22,6 +23,10 @@ body{
     );
 }
 
+/* =======================
+   LOGIN PAGE
+======================= */
+
 .container{
     min-height:100vh;
     display:flex;
@@ -29,80 +34,68 @@ body{
 
 .left-panel{
     flex:1;
-    color:white;
-    padding:60px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:50px;
 }
 
 .right-panel{
     flex:1;
     display:flex;
-    justify-content:center;
     align-items:center;
-    padding:20px;
+    justify-content:center;
+    padding:30px;
+}
+
+.illustration-card{
+    color:white;
+    max-width:450px;
+}
+
+.paynest-big-logo{
+    font-size:90px;
+    margin-bottom:20px;
+}
+
+.illustration-card h1{
+    font-size:52px;
+    margin-bottom:10px;
+}
+
+.tagline{
+    font-size:22px;
+    opacity:.9;
+    margin-bottom:40px;
+}
+
+.feature-list{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    font-size:18px;
 }
 
 .login-card,
 .forgot-card{
     width:100%;
-    max-width:500px;
+    max-width:480px;
     background:white;
-    border-radius:20px;
+    border-radius:24px;
     padding:40px;
-    box-shadow:0 20px 40px rgba(0,0,0,.15);
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
 }
 
 .client-logo{
     width:80px;
-    display:block;
+    height:80px;
     margin:auto;
-}
-
-h2{
-    text-align:center;
-    color:var(--dark);
-    margin-top:15px;
-}
-
-.portal-title{
-    text-align:center;
-    margin-bottom:30px;
-    color:#6B7280;
-}
-
-.field{
-    margin-bottom:20px;
-}
-
-label{
-    display:block;
-    margin-bottom:8px;
-    font-weight:600;
-}
-
-input{
-    width:100%;
-    padding:14px;
-    border:1px solid var(--border);
-    border-radius:10px;
-}
-
-.options{
+    border-radius:50%;
     display:flex;
-    justify-content:space-between;
     align-items:center;
-    margin-bottom:20px;
-}
-
-.login-btn{
-    width:100%;
-    border:none;
-    padding:15px;
-    border-radius:10px;
+    justify-content:center;
+    font-weight:700;
     color:white;
-    font-size:16px;
-    font-weight:600;
-    cursor:pointer;
-
     background:linear-gradient(
         135deg,
         var(--primary),
@@ -110,31 +103,43 @@ input{
     );
 }
 
-.powered-by{
-    margin-top:30px;
+h2{
     text-align:center;
+    margin-top:18px;
+    color:var(--dark);
+    font-size:32px;
 }
 
-.logo-row{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:10px;
-}
-
-.paynest-logo{
-    width:40px;
-}
-
-.copyright{
+.portal-title{
+    text-align:center;
+    color:var(--text);
     margin-top:10px;
-    font-size:12px;
-    color:#6B7280;
+    margin-bottom:30px;
+    font-size:18px;
 }
 
-.error{
-    color:red;
-    font-size:12px;
+.field{
+    margin-bottom:22px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:var(--dark);
+}
+
+input{
+    width:100%;
+    padding:16px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    font-size:16px;
+}
+
+input:focus{
+    outline:none;
+    border-color:var(--primary);
 }
 
 .password-container{
@@ -143,12 +148,119 @@ input{
 
 .eye-btn{
     position:absolute;
-    right:10px;
-    top:10px;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
     border:none;
     background:none;
     cursor:pointer;
+    font-size:20px;
 }
+
+.options{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.options a{
+    color:var(--primary);
+    text-decoration:none;
+    font-weight:600;
+}
+
+.remember{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.remember input{
+    width:auto;
+}
+
+.login-btn{
+    width:100%;
+    border:none;
+    padding:16px;
+    border-radius:14px;
+    font-size:18px;
+    font-weight:700;
+    color:white;
+    cursor:pointer;
+    transition:.3s;
+
+    background:linear-gradient(
+        135deg,
+        var(--primary),
+        var(--secondary)
+    );
+}
+
+.login-btn:hover{
+    transform:translateY(-2px);
+}
+
+.powered-by{
+    margin-top:35px;
+    text-align:center;
+}
+
+.logo-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    font-weight:600;
+}
+
+.mini-logo{
+    font-size:22px;
+}
+
+.copyright{
+    margin-top:10px;
+    font-size:12px;
+    color:var(--text);
+}
+
+.error{
+    color:red;
+    font-size:12px;
+    display:block;
+    margin-top:6px;
+}
+
+.forgot-wrapper{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.back-link{
+    text-decoration:none;
+    color:var(--primary);
+    font-weight:600;
+}
+
+h3{
+    margin-top:20px;
+    margin-bottom:10px;
+    color:var(--dark);
+}
+
+.forgot-text{
+    color:var(--text);
+    margin-bottom:25px;
+    line-height:1.5;
+}
+
+/* =======================
+   MOBILE
+======================= */
 
 @media(max-width:900px){
 
@@ -158,5 +270,18 @@ input{
 
     .right-panel{
         flex:1;
+    }
+
+    .login-card,
+    .forgot-card{
+        padding:28px;
+    }
+
+    h2{
+        font-size:26px;
+    }
+
+    .portal-title{
+        font-size:16px;
     }
 }
