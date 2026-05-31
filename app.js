@@ -9,19 +9,15 @@ function togglePassword() {
 
     if (!password) return;
 
-    if (password.type === "password") {
-
-        password.type = "text";
-
-    } else {
-
-        password.type = "password";
-
-    }
+    password.type =
+        password.type === "password"
+            ? "text"
+            : "password";
 }
 
+
 /* ==========================
-   LOGIN PAGE
+   LOGIN PAGE (FIXED + SMOOTH REDIRECT)
 ========================== */
 
 document.addEventListener(
@@ -30,6 +26,12 @@ document.addEventListener(
 
         const loginForm =
             document.getElementById("loginForm");
+
+        const loginBtn =
+            document.getElementById("loginBtn");
+
+        const loader =
+            document.getElementById("loader");
 
         if (!loginForm) return;
 
@@ -56,68 +58,55 @@ document.addEventListener(
 
                 let valid = true;
 
-                /* Username */
+                /* VALIDATION */
 
-                if (
-                    username.value.trim() === ""
-                ) {
-
+                if (username.value.trim() === "") {
                     usernameError.textContent =
                         "Please enter username";
-
                     valid = false;
                 }
 
-                /* Password */
-
-                if (
-                    password.value.trim() === ""
-                ) {
-
+                if (password.value.trim() === "") {
                     passwordError.textContent =
                         "Please enter password";
-
                     valid = false;
-
-                } else if (
-                    password.value.length < 8
-                ) {
-
+                } else if (password.value.length < 8) {
                     passwordError.textContent =
                         "Password must be at least 8 characters";
-
                     valid = false;
                 }
 
                 if (!valid) return;
 
-                const btn =
-                    document.getElementById("loginBtn");
+                /* BUTTON LOADING STATE */
 
-                btn.disabled = true;
+                loginBtn.disabled = true;
 
-                btn.innerHTML =
+                loginBtn.innerHTML =
                     `<span class="spinner"></span> Signing In...`;
 
+                /* SHOW LOADER (IF EXISTS) */
+                if (loader) {
+                    loader.classList.remove("hidden");
+                }
+
+                /* SMOOTH REDIRECT */
                 setTimeout(function () {
 
-                    alert(
-                        "Login successful. Dashboard will be available in Phase 2."
+                    sessionStorage.setItem(
+                        "paynest_user",
+                        username.value
                     );
 
-                    btn.disabled = false;
+                    window.location.href =
+                        "dashboard.html";
 
-                    btn.innerHTML =
-                        `
-                        <span>Sign In</span>
-                        <span class="arrow">→</span>
-                        `;
-
-                }, 1800);
+                }, 1200);
             }
         );
     }
 );
+
 
 /* ==========================
    FORGOT PASSWORD
@@ -126,102 +115,106 @@ document.addEventListener(
 function sendResetLink() {
 
     const username =
-        document.getElementById(
-            "forgotUsername"
-        );
+        document.getElementById("forgotUsername");
 
     const email =
-        document.getElementById(
-            "forgotEmail"
-        );
+        document.getElementById("forgotEmail");
 
-    if (
-        !username ||
-        !email
-    ) return;
+    if (!username || !email) return;
 
-    if (
-        username.value.trim() === ""
-    ) {
-
-        alert(
-            "Please enter username."
-        );
-
+    if (username.value.trim() === "") {
+        alert("Please enter username.");
         return;
     }
 
-    if (
-        email.value.trim() === ""
-    ) {
-
-        alert(
-            "Please enter registered email."
-        );
-
+    if (email.value.trim() === "") {
+        alert("Please enter registered email.");
         return;
     }
 
     const emailRegex =
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (
-        !emailRegex.test(
-            email.value.trim()
-        )
-    ) {
-
-        alert(
-            "Please enter a valid email address."
-        );
-
+    if (!emailRegex.test(email.value.trim())) {
+        alert("Please enter a valid email address.");
         return;
     }
 
-    alert(
-        "Password reset link sent successfully."
-    );
+    alert("Password reset link sent successfully.");
 
     username.value = "";
     email.value = "";
 }
 
-function logout(){
+
+/* ==========================
+   LOGOUT
+========================== */
+
+function logout() {
     sessionStorage.clear();
     window.location.replace("index.html");
 }
 
-/* CHARTS */
-if(document.getElementById("chart1")){
 
-new Chart(document.getElementById("chart1"),{
-    type:"line",
-    data:{labels:["Jan","Feb","Mar","Apr","May"],
-    datasets:[{data:[10,20,15,30,40],borderColor:"#7c3aed"}]}
-});
+/* ==========================
+   CHARTS
+========================== */
 
-new Chart(document.getElementById("chart2"),{
-    type:"pie",
-    data:{labels:["M","F"],
-    datasets:[{data:[60,40],backgroundColor:["#7c3aed","#ec4899"]}]}
-});
+if (document.getElementById("chart1")) {
 
-new Chart(document.getElementById("chart3"),{
-    type:"bar",
-    data:{labels:["20","30","40"],
-    datasets:[{data:[30,50,20],backgroundColor:"#7c3aed"}]}
-});
+    new Chart(document.getElementById("chart1"), {
+        type: "line",
+        data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+            datasets: [{
+                data: [10, 20, 15, 30, 40],
+                borderColor: "#7c3aed"
+            }]
+        }
+    });
 
-new Chart(document.getElementById("chart4"),{
-    type:"line",
-    data:{labels:["Jan","Feb","Mar","Apr","May"],
-    datasets:[{data:[100,120,140,130,150],borderColor:"#ec4899"}]}
-});
+    new Chart(document.getElementById("chart2"), {
+        type: "pie",
+        data: {
+            labels: ["M", "F"],
+            datasets: [{
+                data: [60, 40],
+                backgroundColor: ["#7c3aed", "#ec4899"]
+            }]
+        }
+    });
 
-new Chart(document.getElementById("chart5"),{
-    type:"bar",
-    data:{labels:["A","B","C"],
-    datasets:[{data:[50,70,30],backgroundColor:"#7c3aed"}]}
-});
+    new Chart(document.getElementById("chart3"), {
+        type: "bar",
+        data: {
+            labels: ["20", "30", "40"],
+            datasets: [{
+                data: [30, 50, 20],
+                backgroundColor: "#7c3aed"
+            }]
+        }
+    });
 
+    new Chart(document.getElementById("chart4"), {
+        type: "line",
+        data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+            datasets: [{
+                data: [100, 120, 140, 130, 150],
+                borderColor: "#ec4899"
+            }]
+        }
+    });
+
+    new Chart(document.getElementById("chart5"), {
+        type: "bar",
+        data: {
+            labels: ["A", "B", "C"],
+            datasets: [{
+                data: [50, 70, 30],
+                backgroundColor: "#7c3aed"
+            }]
+        }
+    });
 }
