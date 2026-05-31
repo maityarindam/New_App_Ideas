@@ -648,3 +648,44 @@ body{
     padding:15px;
     border-radius:14px;
 }
+
+/* ==========================
+   USER PROFILE + LOGOUT
+========================== */
+
+.user-profile{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.user-info .name{
+    font-weight:600;
+    font-size:14px;
+}
+
+.user-info .role{
+    font-size:12px;
+    color:#6b7280;
+}
+
+/* logout button */
+.logout-btn{
+    background:transparent;
+    border:none;
+    cursor:pointer;
+    padding:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.logout-icon{
+    width:22px;
+    height:22px;
+    transition:0.2s;
+}
+
+.logout-btn:hover .logout-icon{
+    transform:scale(1.1);
+}
