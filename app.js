@@ -102,9 +102,7 @@ const loginForm =
 
             setTimeout(function () {  
 
-                alert(  
-                    "Login successful. Dashboard will be available in Phase 2."  
-                );  
+                window.location.href = "dashboard.html";  
 
                 btn.disabled = false;  
 
