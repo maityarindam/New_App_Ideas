@@ -1,4 +1,9 @@
 /* ==========================
+   PAYNEST APP.JS - FINAL CLEAN VERSION
+========================== */
+
+
+/* ==========================
    PASSWORD TOGGLE
 ========================== */
 
@@ -12,8 +17,9 @@ function togglePassword() {
             : "password";
 }
 
+
 /* ==========================
-   LOGIN HANDLER (RESTORED ALERT STYLE)
+   LOGIN HANDLER
 ========================== */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -21,76 +27,93 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("loginForm");
     const loader = document.getElementById("loader");
 
-    if (!form) return;
+    if (form) {
 
-    form.addEventListener("submit", function (e) {
+        form.addEventListener("submit", function (e) {
 
-        e.preventDefault();
+            e.preventDefault();
 
-        const username = document.getElementById("username");
-        const password = document.getElementById("password");
+            const username = document.getElementById("username");
+            const password = document.getElementById("password");
 
-        /* restore old alert behavior */
-        if (username.value.trim() === "") {
-            alert("Enter username");
-            return;
-        }
+            /* ALERT STYLE VALIDATION (RESTORED) */
 
-        if (password.value.trim() === "") {
-            alert("Enter password");
-            return;
-        }
+            if (username.value.trim() === "") {
+                alert("Enter username");
+                return;
+            }
 
-        if (password.value.length < 8) {
-            alert("Password must be at least 8 characters");
-            return;
-        }
+            if (password.value.trim() === "") {
+                alert("Enter password");
+                return;
+            }
 
-        loader.classList.remove("hidden");
+            if (password.value.length < 8) {
+                alert("Password must be at least 8 characters");
+                return;
+            }
 
-        setTimeout(() => {
+            /* SHOW LOADER */
+            if (loader) loader.classList.remove("hidden");
 
-            sessionStorage.setItem("paynest_user", username.value);
+            setTimeout(() => {
 
-            window.location.replace("dashboard.html");
+                sessionStorage.setItem("paynest_user", username.value);
 
-        }, 1200);
-    });
+                window.location.replace("dashboard.html");
+
+            }, 1200);
+        });
+    }
+
+
+    /* ==========================
+       FORGOT PASSWORD HANDLER (FIXED)
+    ========================== */
+
+    const resetBtn = document.getElementById("resetBtn");
+
+    if (resetBtn) {
+
+        resetBtn.addEventListener("click", function () {
+
+            const username =
+                document.getElementById("forgotUsername");
+
+            const email =
+                document.getElementById("forgotEmail");
+
+            if (!username || !email) return;
+
+            /* ALERT STYLE VALIDATION (RESTORED) */
+
+            if (username.value.trim() === "") {
+                alert("Enter username");
+                return;
+            }
+
+            if (email.value.trim() === "") {
+                alert("Enter email");
+                return;
+            }
+
+            /* EMAIL FORMAT CHECK */
+            const emailRegex =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailRegex.test(email.value.trim())) {
+                alert("Enter valid email");
+                return;
+            }
+
+            alert("Reset link sent successfully.");
+        });
+    }
 });
 
 
 /* ==========================
-   FORGOT PASSWORD (FIXED)
-========================== */
-
-function sendResetLink() {
-
-    const username =
-        document.getElementById("forgotUsername");
-
-    const email =
-        document.getElementById("forgotEmail");
-
-    if (!username || !email) return;
-
-    /* restore OLD alert style */
-
-    if (username.value.trim() === "") {
-        alert("Enter username");
-        return;
-    }
-
-    if (email.value.trim() === "") {
-        alert("Enter email");
-        return;
-    }
-
-    alert("Reset link sent successfully.");
-}
-
-
-/* ==========================
-   DASHBOARD LOAD (FIXED UI ONLY)
+   DASHBOARD CHARTS
 ========================== */
 
 if (document.getElementById("chart1")) {
@@ -101,7 +124,8 @@ if (document.getElementById("chart1")) {
             labels: ["Jan","Feb","Mar","Apr","May","Jun"],
             datasets: [{
                 data: [10,20,15,30,25,40],
-                borderColor: "#7C3AED"
+                borderColor: "#7C3AED",
+                tension: 0.4
             }]
         }
     });
@@ -142,7 +166,7 @@ if (document.getElementById("chart1")) {
 
 
 /* ==========================
-   LOGOUT FUNCTION (FIXED)
+   LOGOUT FUNCTION
 ========================== */
 
 function logout() {
