@@ -462,3 +462,189 @@ body{
         transform:rotate(360deg);
     }
 }
+
+/* ==========================
+   BASE RESET
+========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter, Arial;
+}
+
+/* ==========================
+   APP LAYOUT
+========================== */
+
+.app{
+    display:flex;
+    height:100vh;
+    background:#f6f7fb;
+}
+
+/* ==========================
+   SIDEBAR
+========================== */
+
+.sidebar{
+    width:260px;
+    background:#0b1020;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:20px;
+}
+
+.sidebar-logo img{
+    width:150px;
+    margin-bottom:20px;
+}
+
+.menu a{
+    display:block;
+    padding:12px;
+    margin:6px 0;
+    border-radius:10px;
+    color:#cbd5e1;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.menu a:hover,
+.menu a.active{
+    background:#7c3aed;
+    color:white;
+}
+
+/* ==========================
+   MAIN AREA
+========================== */
+
+.main{
+    flex:1;
+    padding:20px;
+    overflow:auto;
+}
+
+/* ==========================
+   TOPBAR
+========================== */
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:white;
+    padding:14px 18px;
+    border-radius:12px;
+}
+
+.search input{
+    width:400px;
+    padding:10px 14px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.company{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.company img{
+    width:28px;
+}
+
+.user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.avatar{
+    width:40px;
+    height:40px;
+    background:#7c3aed;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    font-weight:bold;
+}
+
+/* ==========================
+   GREETING
+========================== */
+
+.greeting{
+    margin-top:20px;
+}
+
+/* ==========================
+   KPI CARDS
+========================== */
+
+.kpi{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-top:20px;
+}
+
+.kpi-card{
+    background:white;
+    padding:18px;
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.05);
+}
+
+.kpi-card h3{
+    margin-top:10px;
+    font-size:22px;
+}
+
+/* ==========================
+   CHART GRID
+========================== */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-top:20px;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    border-radius:14px;
+    height:260px;
+}
+
+/* ==========================
+   WIDGETS
+========================== */
+
+.widgets{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-top:20px;
+}
+
+.widget{
+    background:white;
+    padding:15px;
+    border-radius:14px;
+}
