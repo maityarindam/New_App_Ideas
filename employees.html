@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>PayNest | Employees</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logos/paynest-favicon.svg"/>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <svg class="sb-logo-icon-svg" width="26" height="26" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#7C3AED"/><path d="M8 22 C8 14 16 10 16 10 C16 10 24 14 24 22" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="16" cy="10" r="2.5" fill="white"/></svg>
+      <span class="sb-logo-text">PayNest</span>
+    </div>
+    <button class="sb-pin-btn" id="sbPinBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg><span>Keep Open</span></button>
+    <nav class="sb-nav">
+      <a class="sb-item" href="dashboard.html"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="sb-label">Dashboard</span></a>
+      <a class="sb-item active" href="employees.html"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/></svg></span><span class="sb-label">Employees</span></a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg></span><span class="sb-label">Attendance</span></a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="sb-label">Leave</span></a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span><span class="sb-label">Performance</span></a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span><span class="sb-label">Reports</span></a>
+      <a class="sb-item" href="#"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="sb-label">Settings</span></a>
+    </nav>
+    <div class="sb-footer"><button class="sb-item sb-logout" onclick="logout()"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="sb-label">Logout</span></button></div>
+    <div class="sb-tooltip" id="sbTooltip"></div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap" id="mainWrap">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-brand">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#7C3AED"/><path d="M8 22 C8 14 16 10 16 10 C16 10 24 14 24 22" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="16" cy="10" r="2.5" fill="white"/></svg>
+          <span class="topbar-brand-name">PayNest</span>
+        </div>
+      </div>
+      <div class="topbar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search employees, menus, reports..." id="globalSearch"/>
+        <span class="search-kbd">⌘K</span>
+      </div>
+      <div class="topbar-right">
+        <button class="tb-icon-btn" title="Calendar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
+        <button class="tb-icon-btn" id="notifBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-badge">1</span></button>
+        <button class="tb-icon-btn dark-mode-btn" id="darkModeBtn" title="Toggle dark mode"><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+        <div class="tb-user" id="userDropdownBtn">
+          <div class="tb-avatar" id="tbAvatar">A</div>
+          <div class="tb-user-info"><span class="tb-name" id="tbName">Arindam Maity</span><span class="tb-role">Admin</span></div>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="ud-header"><div class="ud-avatar" id="udAvatar">A</div><div><div class="ud-name" id="udName">Arindam Maity</div><div class="ud-email">admin@abcltd.com</div></div></div>
+            <div class="ud-divider"></div>
+            <label class="ud-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Upload Photo<input type="file" accept="image/*" id="photoUpload" style="display:none"/></label>
+            <a class="ud-item" href="#"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</a>
+            <div class="ud-divider"></div>
+            <button class="ud-item ud-logout" onclick="logout()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</button>
+          </div>
+        </div>
+        <div class="tb-client"><div class="tb-client-abbr">AB</div><span class="tb-client-name">ABC Ltd.</span></div>
+      </div>
+    </header>
+
+    <!-- EMP MODULE TABS -->
+    <div class="emp-tabs-bar">
+      <button class="emp-tab active" data-tab="overview">Overview</button>
+      <button class="emp-tab" data-tab="directory">Employee Directory</button>
+      <button class="emp-tab" data-tab="profile">Employee Profile</button>
+      <button class="emp-tab" data-tab="orgtree">Organization Tree</button>
+      <button class="emp-tab" data-tab="onboarding">Onboarding</button>
+      <button class="emp-tab" data-tab="increment">Increment</button>
+      <button class="emp-tab" data-tab="lifecycle">Employee Life Cycle</button>
+    </div>
+
+    <div class="page-body">
+
+      <!-- ====== TAB: OVERVIEW ====== -->
+      <div class="emp-panel active" id="tab-overview">
+        <!-- KPI CARDS -->
+        <div class="ov-kpi-grid">
+          <div class="ov-kpi"><div class="ov-kpi-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="ov-kpi-val" id="kpiTotal">1250</div><div class="ov-kpi-lbl">Total Employees</div><div class="ov-kpi-sub">All Employees</div></div></div>
+          <div class="ov-kpi"><div class="ov-kpi-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="ov-kpi-val" id="kpiActive">1180</div><div class="ov-kpi-lbl">Active Employees</div><div class="ov-kpi-sub">Currently Active</div></div></div>
+          <div class="ov-kpi"><div class="ov-kpi-icon orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></div><div><div class="ov-kpi-val" id="kpiJoiners">18</div><div class="ov-kpi-lbl">New Joiners</div><div class="ov-kpi-sub">This Month</div></div></div>
+          <div class="ov-kpi"><div class="ov-kpi-icon red"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg></div><div><div class="ov-kpi-val">22</div><div class="ov-kpi-lbl">Confirmation Due</div><div class="ov-kpi-sub">Next 30 Days</div></div></div>
+          <div class="ov-kpi"><div class="ov-kpi-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="ov-kpi-val">42</div><div class="ov-kpi-lbl">On Probation</div><div class="ov-kpi-sub">Employees</div></div></div>
+          <div class="ov-kpi"><div class="ov-kpi-icon gray"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="15" y1="8" x2="21" y2="8"/></svg></div><div><div class="ov-kpi-val">5</div><div class="ov-kpi-lbl">Resigned</div><div class="ov-kpi-sub">This Month</div></div></div>
+          <div class="ov-kpi"><div class="ov-kpi-icon teal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><div><div class="ov-kpi-val">12</div><div class="ov-kpi-lbl">Departments</div><div class="ov-kpi-sub">In Organization</div></div></div>
+          <div class="ov-kpi"><div class="ov-kpi-icon indigo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/></svg></div><div><div class="ov-kpi-val">7</div><div class="ov-kpi-lbl">Locations</div><div class="ov-kpi-sub">Across India</div></div></div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="ov-charts-row">
+          <div class="ov-chart-card wide">
+            <div class="cc-header"><div class="cc-title">Employee Headcount Trend</div><select class="cc-year-select"><option>Current Financial Year</option><option>Last Year</option></select></div>
+            <div style="height:200px"><canvas id="ovHeadcount"></canvas></div>
+          </div>
+          <div class="ov-chart-card">
+            <div class="cc-header"><div class="cc-title">Gender Distribution</div></div>
+            <div style="height:160px;position:relative">
+              <canvas id="ovGender"></canvas>
+              <div class="donut-center"><div class="donut-num" style="font-size:14px">1250</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="width:10px;height:10px;border-radius:50%;background:#7C3AED;display:inline-block"></span>Male 70% (875)</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="width:10px;height:10px;border-radius:50%;background:#EC4899;display:inline-block"></span>Female 28% (350)</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="width:10px;height:10px;border-radius:50%;background:#06B6D4;display:inline-block"></span>Others 2% (25)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WIDGETS ROW -->
+        <div class="ov-widgets-row">
+          <div class="ov-widget-card">
+            <div class="bc-header"><span class="bc-title">Upcoming Birthdays</span></div>
+            <div class="ov-list" id="birthdayList">
+              <div class="ov-list-item"><div class="ov-list-avatar" style="background:#7C3AED">A</div><div><div class="ov-list-name">Arindam Maity</div><div class="ov-list-sub">05 Jun</div></div></div>
+              <div class="ov-list-item"><div class="ov-list-avatar" style="background:#EC4899">R</div><div><div class="ov-list-name">Rohit Sharma</div><div class="ov-list-sub">08 Jun</div></div></div>
+            </div>
+          </div>
+          <div class="ov-widget-card">
+            <div class="bc-header"><span class="bc-title">Work Anniversaries</span></div>
+            <div class="ov-list">
+              <div class="ov-list-item"><div class="ov-list-avatar" style="background:#10B981">S</div><div><div class="ov-list-name">Sneha Das</div><div class="ov-list-sub">5 Years on 10 Jun</div></div></div>
+              <div class="ov-list-item"><div class="ov-list-avatar" style="background:#F59E0B">P</div><div><div class="ov-list-name">Pritam Shaw</div><div class="ov-list-sub">3 Years on 12 Jun</div></div></div>
+            </div>
+          </div>
+          <div class="ov-widget-card">
+            <div class="bc-header"><span class="bc-title">Confirmation Due</span></div>
+            <table class="ov-table">
+              <thead><tr><th>Employee</th><th>Confirm Date</th><th>Days Left</th></tr></thead>
+              <tbody>
+                <tr><td>Rahul Verma</td><td>15 Jun 2025</td><td><span class="badge-danger">8 Days</span></td></tr>
+                <tr><td>Priya Singh</td><td>20 Jun 2025</td><td><span class="badge-warning">13 Days</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ov-widget-card">
+            <div class="bc-header"><span class="bc-title">Recent Joiners <small style="color:var(--muted);font-weight:400">(Last 30 Days)</small></span></div>
+            <div class="ov-list" id="recentJoinersList">
+              <div class="ov-list-item"><div class="ov-list-avatar" style="background:#7C3AED">V</div><div><div class="ov-list-name">Vikram Patel</div><div class="ov-list-sub">01 Jun 2025</div></div></div>
+              <div class="ov-list-item"><div class="ov-list-avatar" style="background:#EC4899">N</div><div><div class="ov-list-name">Neha Kumari</div><div class="ov-list-sub">28 May 2025</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== TAB: DIRECTORY ====== -->
+      <div class="emp-panel" id="tab-directory">
+        <div class="dir-header">
+          <div>
+            <h2 class="page-title">Employee Directory</h2>
+            <p class="page-sub">View, manage and organize all employees</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-outline">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Import
+            </button>
+            <button class="btn-outline">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export
+            </button>
+            <button class="btn-primary" id="openAddEmpBtn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Employee
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="dir-filters">
+          <input type="text" class="dir-search" placeholder="Search by name, emp ID, email..." id="dirSearch"/>
+          <select class="dir-filter-select" id="filterDept"><option value="">Department: All</option><option>Payroll</option><option>HR</option><option>Finance</option><option>IT</option><option>Operations</option><option>Sales</option></select>
+          <select class="dir-filter-select" id="filterDesig"><option value="">Designation: All</option><option>Manager</option><option>Executive</option><option>Analyst</option><option>Developer</option><option>Coordinator</option><option>Sales Executive</option></select>
+          <select class="dir-filter-select" id="filterLoc"><option value="">Location: All</option><option>Delhi</option><option>Mumbai</option><option>Bangalore</option></select>
+          <select class="dir-filter-select" id="filterStatus"><option value="">Status: All</option><option>Active</option><option>Inactive</option><option>On Probation</option></select>
+          <button class="btn-outline" id="applyFiltersBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filters
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="dir-table-wrap">
+          <table class="dir-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Photo</th><th>Emp ID</th><th>Name</th>
+                <th>Department</th><th>Designation</th><th>DOJ</th>
+                <th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="empTableBody"></tbody>
+          </table>
+        </div>
+        <div class="dir-pagination">
+          <span class="pagination-info" id="paginationInfo">Showing 1 to 6 of 6 entries</span>
+          <div class="pagination-btns">
+            <button class="pg-btn" id="pgPrev">&lt;</button>
+            <button class="pg-btn active" id="pgCurrent">1</button>
+            <button class="pg-btn" id="pgNext">&gt;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== TAB: PROFILE ====== -->
+      <div class="emp-panel" id="tab-profile">
+        <div id="profileContent">
+          <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 16px;display:block;opacity:.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <p>Select an employee from the <strong>Employee Directory</strong> to view their profile.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== TAB: ORG TREE ====== -->
+      <div class="emp-panel" id="tab-orgtree">
+        <h2 class="page-title" style="margin-bottom:16px">Organization Tree</h2>
+        <div class="org-tree-wrap">
+          <div class="org-node root"><div class="org-card root-card"><div class="org-avatar" style="background:#7C3AED">A</div><div><div class="org-name">Arindam Maity</div><div class="org-role">HR Manager</div></div></div></div>
+          <div class="org-children">
+            <div class="org-branch">
+              <div class="org-node"><div class="org-card"><div class="org-avatar" style="background:#10B981">S</div><div><div class="org-name">Sneha Das</div><div class="org-role">Finance Analyst</div></div></div></div>
+            </div>
+            <div class="org-branch">
+              <div class="org-node"><div class="org-card"><div class="org-avatar" style="background:#EC4899">R</div><div><div class="org-name">Rohit Sharma</div><div class="org-role">HR Executive</div></div></div></div>
+            </div>
+            <div class="org-branch">
+              <div class="org-node"><div class="org-card"><div class="org-avatar" style="background:#F59E0B">V</div><div><div class="org-name">Vikram Patel</div><div class="org-role">IT Developer</div></div></div></div>
+            </div>
+            <div class="org-branch">
+              <div class="org-node"><div class="org-card"><div class="org-avatar" style="background:#06B6D4">P</div><div><div class="org-name">Pritam Shaw</div><div class="org-role">Sales Executive</div></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== TAB: ONBOARDING ====== -->
+      <div class="emp-panel" id="tab-onboarding">
+        <h2 class="page-title" style="margin-bottom:6px">Onboarding</h2>
+        <p class="page-sub" style="margin-bottom:16px">Track employee onboarding progress</p>
+        <div class="onboard-list" id="onboardList"></div>
+      </div>
+
+      <!-- ====== TAB: INCREMENT ====== -->
+      <div class="emp-panel" id="tab-increment">
+        <h2 class="page-title" style="margin-bottom:6px">Increment Management</h2>
+        <p class="page-sub" style="margin-bottom:16px">Track salary increments and appraisals</p>
+        <div class="dir-table-wrap">
+          <table class="dir-table">
+            <thead><tr><th>Emp ID</th><th>Name</th><th>Department</th><th>Current CTC</th><th>Increment %</th><th>New CTC</th><th>Effective Date</th><th>Status</th></tr></thead>
+            <tbody id="incrementTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ====== TAB: LIFECYCLE ====== -->
+      <div class="emp-panel" id="tab-lifecycle">
+        <h2 class="page-title" style="margin-bottom:6px">Employee Life Cycle</h2>
+        <p class="page-sub" style="margin-bottom:16px">Track employee journey from joining to separation</p>
+        <div class="lifecycle-grid" id="lifecycleGrid"></div>
+      </div>
+
+    </div><!-- /page-body -->
+
+    <footer class="app-footer">
+      <span class="footer-copy">© 2026 PayNest Technologies. All rights reserved.</span>
+      <span class="footer-ver">Version: 1.0.0</span>
+      <div class="footer-brand">Powered by <svg width="16" height="16" viewBox="0 0 32 32" fill="none" style="margin:0 4px"><rect width="32" height="32" rx="8" fill="#7C3AED"/><path d="M8 22 C8 14 16 10 16 10 C16 10 24 14 24 22" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="16" cy="10" r="2.5" fill="white"/></svg><span class="footer-brand-name">PayNest</span></div>
+    </footer>
+  </div>
+</div>
+
+<!-- ADD EMPLOYEE DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="emp-drawer" id="empDrawer">
+  <div class="drawer-header">
+    <h3 id="drawerTitle">Add New Employee</h3>
+    <button class="drawer-close" id="drawerClose">&times;</button>
+  </div>
+  <div class="drawer-body">
+    <!-- Step nav -->
+    <div class="drawer-steps">
+      <div class="d-step active" data-step="1"><div class="d-step-num">1</div><div class="d-step-lbl">Personal Details</div></div>
+      <div class="d-step" data-step="2"><div class="d-step-num">2</div><div class="d-step-lbl">Contact Details</div></div>
+      <div class="d-step" data-step="3"><div class="d-step-num">3</div><div class="d-step-lbl">Employment Details</div></div>
+      <div class="d-step" data-step="4"><div class="d-step-num">4</div><div class="d-step-lbl">Statutory Details</div></div>
+      <div class="d-step" data-step="5"><div class="d-step-num">5</div><div class="d-step-lbl">Documents</div></div>
+    </div>
+
+    <!-- Step 1: Personal -->
+    <div class="drawer-step-panel active" id="dstep-1">
+      <h4 class="ds-title">Personal Details</h4>
+      <div class="form-grid-2">
+        <div class="form-group full"><label>Employee Code <span class="req">*</span></label><input type="text" id="fEmpCode" placeholder="EMP007" class="form-input"/></div>
+        <div class="form-group"><label>First Name <span class="req">*</span></label><input type="text" id="fFirstName" placeholder="Ananya" class="form-input"/></div>
+        <div class="form-group"><label>Last Name <span class="req">*</span></label><input type="text" id="fLastName" placeholder="Gupta" class="form-input"/></div>
+        <div class="form-group"><label>Gender <span class="req">*</span></label><select id="fGender" class="form-input"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+        <div class="form-group"><label>Date of Birth <span class="req">*</span></label><input type="date" id="fDob" class="form-input"/></div>
+        <div class="form-group"><label>Marital Status</label><select id="fMarital" class="form-input"><option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option></select></div>
+        <div class="form-group"><label>Blood Group</label><select id="fBlood" class="form-input"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+      </div>
+    </div>
+
+    <!-- Step 2: Contact -->
+    <div class="drawer-step-panel" id="dstep-2">
+      <h4 class="ds-title">Contact Details</h4>
+      <div class="form-grid-2">
+        <div class="form-group"><label>Mobile Number <span class="req">*</span></label><input type="tel" id="fMobile" placeholder="9876543210" class="form-input"/></div>
+        <div class="form-group"><label>Email <span class="req">*</span></label><input type="email" id="fEmail" placeholder="ananya@company.com" class="form-input"/></div>
+        <div class="form-group full"><label>Current Address</label><textarea id="fAddress" placeholder="123, Green Park, Delhi" class="form-input" rows="2"></textarea></div>
+        <div class="form-group full"><label>Permanent Address</label><textarea id="fPermAddress" placeholder="Same as current" class="form-input" rows="2"></textarea></div>
+        <div class="form-group full"><label>Emergency Contact</label><input type="text" id="fEmergency" placeholder="Name - Relation - Phone" class="form-input"/></div>
+      </div>
+    </div>
+
+    <!-- Step 3: Employment -->
+    <div class="drawer-step-panel" id="dstep-3">
+      <h4 class="ds-title">Employment Details</h4>
+      <div class="form-grid-2">
+        <div class="form-group"><label>Department <span class="req">*</span></label><select id="fDept" class="form-input"><option value="">Select</option><option>Payroll</option><option>HR</option><option>Finance</option><option>IT</option><option>Operations</option><option>Sales</option><option>Marketing</option></select></div>
+        <div class="form-group"><label>Designation <span class="req">*</span></label><input type="text" id="fDesig" placeholder="Analyst" class="form-input"/></div>
+        <div class="form-group"><label>Date of Joining <span class="req">*</span></label><input type="date" id="fDoj" class="form-input"/></div>
+        <div class="form-group"><label>Employment Type</label><select id="fEmpType" class="form-input"><option>Full-Time</option><option>Part-Time</option><option>Contract</option><option>Intern</option></select></div>
+        <div class="form-group"><label>Location</label><select id="fLocation" class="form-input"><option value="">Select</option><option>Delhi</option><option>Mumbai</option><option>Bangalore</option><option>Hyderabad</option><option>Pune</option></select></div>
+        <div class="form-group"><label>Reporting Manager</label><input type="text" id="fManager" placeholder="Manager Name" class="form-input"/></div>
+        <div class="form-group"><label>CTC (Annual)</label><input type="number" id="fCtc" placeholder="600000" class="form-input"/></div>
+        <div class="form-group"><label>Status</label><select id="fStatus" class="form-input"><option>Active</option><option>On Probation</option><option>Inactive</option></select></div>
+      </div>
+    </div>
+
+    <!-- Step 4: Statutory -->
+    <div class="drawer-step-panel" id="dstep-4">
+      <h4 class="ds-title">Statutory Details</h4>
+      <div class="form-grid-2">
+        <div class="form-group"><label>PAN Number</label><input type="text" id="fPan" placeholder="ABCDE1234F" class="form-input"/></div>
+        <div class="form-group"><label>Aadhar Number</label><input type="text" id="fAadhar" placeholder="1234 5678 9012" class="form-input"/></div>
+        <div class="form-group"><label>PF Account Number</label><input type="text" id="fPf" placeholder="PF/123/456" class="form-input"/></div>
+        <div class="form-group"><label>UAN Number</label><input type="text" id="fUan" placeholder="100123456789" class="form-input"/></div>
+        <div class="form-group"><label>Bank Name</label><input type="text" id="fBank" placeholder="HDFC Bank" class="form-input"/></div>
+        <div class="form-group"><label>Account Number</label><input type="text" id="fAccNo" placeholder="1234567890" class="form-input"/></div>
+        <div class="form-group"><label>IFSC Code</label><input type="text" id="fIfsc" placeholder="HDFC0001234" class="form-input"/></div>
+      </div>
+    </div>
+
+    <!-- Step 5: Documents -->
+    <div class="drawer-step-panel" id="dstep-5">
+      <h4 class="ds-title">Documents</h4>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Upload required documents for the employee record.</p>
+      <div class="doc-upload-list">
+        <div class="doc-upload-row"><span>Resume / CV</span><label class="doc-upload-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload<input type="file" style="display:none"/></label></div>
+        <div class="doc-upload-row"><span>Aadhar Card</span><label class="doc-upload-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload<input type="file" style="display:none"/></label></div>
+        <div class="doc-upload-row"><span>PAN Card</span><label class="doc-upload-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload<input type="file" style="display:none"/></label></div>
+        <div class="doc-upload-row"><span>Experience Letter</span><label class="doc-upload-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload<input type="file" style="display:none"/></label></div>
+        <div class="doc-upload-row"><span>10th Marksheet</span><label class="doc-upload-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload<input type="file" style="display:none"/></label></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-outline" id="drawerCancel">Cancel</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn-outline" id="drawerPrev" style="display:none">← Previous</button>
+      <button class="btn-primary" id="drawerNext">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
