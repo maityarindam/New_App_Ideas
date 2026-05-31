@@ -13,7 +13,7 @@ function togglePassword() {
 }
 
 /* ==========================
-   LOGIN HANDLER (SMOOTH)
+   LOGIN HANDLER (RESTORED ALERT STYLE)
 ========================== */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -30,26 +30,28 @@ document.addEventListener("DOMContentLoaded", function () {
         const username = document.getElementById("username");
         const password = document.getElementById("password");
 
-        let valid = true;
-
-        if (!username.value.trim()) valid = false;
-        if (!password.value.trim()) valid = false;
-
-        if (!valid) {
-            alert("Enter valid credentials");
+        /* restore old alert behavior */
+        if (username.value.trim() === "") {
+            alert("Enter username");
             return;
         }
 
-        // SHOW LOADER
+        if (password.value.trim() === "") {
+            alert("Enter password");
+            return;
+        }
+
+        if (password.value.length < 8) {
+            alert("Password must be at least 8 characters");
+            return;
+        }
+
         loader.classList.remove("hidden");
 
-        // simulate API login (realistic delay)
         setTimeout(() => {
 
-            // store session
             sessionStorage.setItem("paynest_user", username.value);
 
-            // instant redirect (no flicker)
             window.location.replace("dashboard.html");
 
         }, 1200);
@@ -58,7 +60,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 /* ==========================
-   DASHBOARD CHARTS
+   FORGOT PASSWORD (FIXED)
+========================== */
+
+function sendResetLink() {
+
+    const username =
+        document.getElementById("forgotUsername");
+
+    const email =
+        document.getElementById("forgotEmail");
+
+    if (!username || !email) return;
+
+    /* restore OLD alert style */
+
+    if (username.value.trim() === "") {
+        alert("Enter username");
+        return;
+    }
+
+    if (email.value.trim() === "") {
+        alert("Enter email");
+        return;
+    }
+
+    alert("Reset link sent successfully.");
+}
+
+
+/* ==========================
+   DASHBOARD LOAD (FIXED UI ONLY)
 ========================== */
 
 if (document.getElementById("chart1")) {
@@ -69,8 +101,7 @@ if (document.getElementById("chart1")) {
             labels: ["Jan","Feb","Mar","Apr","May","Jun"],
             datasets: [{
                 data: [10,20,15,30,25,40],
-                borderColor: "#7C3AED",
-                tension: 0.4
+                borderColor: "#7C3AED"
             }]
         }
     });
@@ -111,12 +142,12 @@ if (document.getElementById("chart1")) {
 
 
 /* ==========================
-   LOGOUT FUNCTION
+   LOGOUT FUNCTION (FIXED)
 ========================== */
 
 function logout() {
 
-    sessionStorage.removeItem("paynest_user");
+    sessionStorage.clear();
 
     window.location.replace("index.html");
 }
