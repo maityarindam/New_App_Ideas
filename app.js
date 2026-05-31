@@ -185,3 +185,43 @@ function sendResetLink() {
     username.value = "";
     email.value = "";
 }
+
+function logout(){
+    sessionStorage.clear();
+    window.location.replace("index.html");
+}
+
+/* CHARTS */
+if(document.getElementById("chart1")){
+
+new Chart(document.getElementById("chart1"),{
+    type:"line",
+    data:{labels:["Jan","Feb","Mar","Apr","May"],
+    datasets:[{data:[10,20,15,30,40],borderColor:"#7c3aed"}]}
+});
+
+new Chart(document.getElementById("chart2"),{
+    type:"pie",
+    data:{labels:["M","F"],
+    datasets:[{data:[60,40],backgroundColor:["#7c3aed","#ec4899"]}]}
+});
+
+new Chart(document.getElementById("chart3"),{
+    type:"bar",
+    data:{labels:["20","30","40"],
+    datasets:[{data:[30,50,20],backgroundColor:"#7c3aed"}]}
+});
+
+new Chart(document.getElementById("chart4"),{
+    type:"line",
+    data:{labels:["Jan","Feb","Mar","Apr","May"],
+    datasets:[{data:[100,120,140,130,150],borderColor:"#ec4899"}]}
+});
+
+new Chart(document.getElementById("chart5"),{
+    type:"bar",
+    data:{labels:["A","B","C"],
+    datasets:[{data:[50,70,30],backgroundColor:"#7c3aed"}]}
+});
+
+}
