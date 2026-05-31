@@ -102,16 +102,10 @@ document.addEventListener(
                 setTimeout(function () {
 
                     alert(
-                        "Login successful. Dashboard will be available in Phase 2."
-                    );
+setTimeout(function () {
 
-                    btn.disabled = false;
-
-                    btn.innerHTML =
-                        `
-                        <span>Sign In</span>
-                        <span class="arrow">→</span>
-                        `;
+    // ✅ Redirect to dashboard AFTER login success
+    window.location.href = "dashboard.html";
 
                 }, 1800);
             }
