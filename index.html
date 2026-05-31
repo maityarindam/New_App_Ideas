@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PayNest | Login</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -14,34 +13,53 @@
     <div class="main-container">
 
         <!-- LEFT PANEL -->
+
         <div class="left-panel">
 
             <div class="left-content">
 
-                <img src="assets/logos/paynest-logo-white.svg"
-                    class="paynest-logo-large"
-                    alt="PayNest">
+                <img
+                    src="assets/logos/paynest-logo.svg"
+                    alt="PayNest"
+                    class="paynest-logo-large">
 
                 <h1>
-                    Smart Payroll Management<br>
+                    Smart Payroll Management
                     for Modern Businesses
                 </h1>
 
                 <p class="hero-text">
-                    Streamline payroll operations, manage employee data,
-                    and ensure compliance with ease.
+                    Streamline payroll operations,
+                    manage employee data and
+                    ensure compliance with ease.
                 </p>
 
-                <img src="assets/illustrations/payroll-illustration.svg"
-                    class="illustration"
-                    alt="Payroll">
+                <img
+                    src="assets/illustrations/payroll-illustration.svg"
+                    alt="Payroll Illustration"
+                    class="illustration">
 
                 <div class="feature-grid">
 
-                    <div class="feature-card">👥 Employee Management</div>
-                    <div class="feature-card">💰 Payroll Processing</div>
-                    <div class="feature-card">📊 Reports & Analytics</div>
-                    <div class="feature-card">🔒 Security & Compliance</div>
+                    <div class="feature-card">
+                        <span>👥</span>
+                        <p>Employee Management</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <span>💰</span>
+                        <p>Payroll Processing</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <span>📊</span>
+                        <p>Reports & Analytics</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <span>🔒</span>
+                        <p>Security & Compliance</p>
+                    </div>
 
                 </div>
 
@@ -50,15 +68,17 @@
         </div>
 
         <!-- RIGHT PANEL -->
+
         <div class="right-panel">
 
             <div class="login-card">
 
                 <div class="company-section">
 
-                    <img src="assets/logos/abc-logo.svg"
-                        class="company-logo"
-                        alt="ABC">
+                    <img
+                        src="assets/logos/abc-logo.svg"
+                        alt="ABC Ltd"
+                        class="company-logo">
 
                     <h2>ABC Ltd.</h2>
 
@@ -70,7 +90,6 @@
 
                 </div>
 
-                <!-- FORM -->
                 <form id="loginForm">
 
                     <div class="input-group">
@@ -79,15 +98,22 @@
 
                         <div class="input-wrapper">
 
-                            <img src="assets/icons/user.svg">
+                            <img
+                                src="assets/icons/user.svg"
+                                alt="User">
 
-                            <input type="text"
+                            <input
+                                type="text"
                                 id="username"
-                                placeholder="Enter username">
+                                placeholder="Enter your username">
 
                         </div>
 
-                        <small id="usernameError" class="error"></small>
+                        <small
+                            id="usernameError"
+                            class="error">
+                        </small>
+
                     </div>
 
                     <div class="input-group">
@@ -96,30 +122,43 @@
 
                         <div class="input-wrapper">
 
-                            <img src="assets/icons/lock.svg">
+                            <img
+                                src="assets/icons/lock.svg"
+                                alt="Lock">
 
-                            <input type="password"
+                            <input
+                                type="password"
                                 id="password"
-                                placeholder="Enter password">
+                                placeholder="Enter your password">
 
-                            <button type="button"
+                            <button
+                                type="button"
                                 class="eye-button"
                                 onclick="togglePassword()">
 
-                                <img src="assets/icons/eye.svg">
+                                <img
+                                    src="assets/icons/eye.svg"
+                                    alt="Show Password">
 
                             </button>
 
                         </div>
 
-                        <small id="passwordError" class="error"></small>
+                        <small
+                            id="passwordError"
+                            class="error">
+                        </small>
+
                     </div>
 
                     <div class="login-options">
 
-                        <label>
+                        <label class="remember-me">
+
                             <input type="checkbox">
+
                             Remember Me
+
                         </label>
 
                         <a href="forgot-password.html">
@@ -128,33 +167,49 @@
 
                     </div>
 
-                    <!-- LOGIN BUTTON -->
-                    <button type="submit"
+                    <button
+                        type="submit"
                         id="loginBtn"
                         class="sign-in-btn">
-                        Sign In →
+
+                        <span>Sign In</span>
+
+                        <span class="arrow">
+                            →
+                        </span>
+
                     </button>
 
                 </form>
 
-                <!-- FOOTER -->
                 <div class="footer-branding">
 
-                    <p>Powered by</p>
+                    <p class="powered-text">
+                        Powered by
+                    </p>
 
                     <div class="brand-row">
 
-                        <img src="assets/logos/paynest-logo.svg"
+                        <img
+                            src="assets/logos/paynest-logo.svg"
+                            alt="PayNest"
                             class="footer-logo">
 
-                        <span>|</span>
+                        <span class="footer-divider">
+                            |
+                        </span>
 
-                        <span>Nest Your Workforce</span>
+                        <span class="footer-tagline">
+                            Nest Your Workforce
+                        </span>
 
                     </div>
 
                     <p class="copyright">
-                        © 2026 PayNest Technologies. All rights reserved.
+
+                        © 2026 PayNest Technologies.
+                        All rights reserved.
+
                     </p>
 
                 </div>
@@ -166,11 +221,7 @@
     </div>
 
     <script src="app.js"></script>
-    
-<div id="loader" class="loader-overlay hidden">
-    <div class="spinner"></div>
-</div>
-    
+
 </body>
 
 </html>
