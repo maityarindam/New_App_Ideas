@@ -13,3 +13,11 @@
 <path d="M18 48 C28 60,42 60,52 48" fill="none" stroke="url(#g)" stroke-width="4"/>
 
 <text x="29" y="41" font-size="22" font-weight="bold" fill="url(#g)">₹</text>
+
+<text x="75" y="45"
+font-size="32"
+font-weight="700"
+fill="url(#g)">
+PayNest
+</text>
+</svg>
