@@ -1,181 +1,190 @@
 /* ==========================
-   PASSWORD TOGGLE
+PASSWORD TOGGLE
 ========================== */
 
 function togglePassword() {
 
-    const password =
-        document.getElementById("password");
+const password =  
+    document.getElementById("password");  
 
-    if (!password) return;
+if (!password) return;  
 
-    if (password.type === "password") {
+if (password.type === "password") {  
 
-        password.type = "text";
+    password.type = "text";  
 
-    } else {
+} else {  
 
-        password.type = "password";
+    password.type = "password";  
 
-    }
+}
+
 }
 
 /* ==========================
-   LOGIN PAGE
+LOGIN PAGE
 ========================== */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+"DOMContentLoaded",
+function () {
 
-        const loginForm =
-            document.getElementById("loginForm");
+const loginForm =  
+        document.getElementById("loginForm");  
 
-        if (!loginForm) return;
+    if (!loginForm) return;  
 
-        loginForm.addEventListener(
-            "submit",
-            function (e) {
+    loginForm.addEventListener(  
+        "submit",  
+        function (e) {  
 
-                e.preventDefault();
+            e.preventDefault();  
 
-                const username =
-                    document.getElementById("username");
+            const username =  
+                document.getElementById("username");  
 
-                const password =
-                    document.getElementById("password");
+            const password =  
+                document.getElementById("password");  
 
-                const usernameError =
-                    document.getElementById("usernameError");
+            const usernameError =  
+                document.getElementById("usernameError");  
 
-                const passwordError =
-                    document.getElementById("passwordError");
+            const passwordError =  
+                document.getElementById("passwordError");  
 
-                usernameError.textContent = "";
-                passwordError.textContent = "";
+            usernameError.textContent = "";  
+            passwordError.textContent = "";  
 
-                let valid = true;
+            let valid = true;  
 
-                /* Username */
+            /* Username */  
 
-                if (
-                    username.value.trim() === ""
-                ) {
+            if (  
+                username.value.trim() === ""  
+            ) {  
 
-                    usernameError.textContent =
-                        "Please enter username";
+                usernameError.textContent =  
+                    "Please enter username";  
 
-                    valid = false;
-                }
+                valid = false;  
+            }  
 
-                /* Password */
+            /* Password */  
 
-                if (
-                    password.value.trim() === ""
-                ) {
+            if (  
+                password.value.trim() === ""  
+            ) {  
 
-                    passwordError.textContent =
-                        "Please enter password";
+                passwordError.textContent =  
+                    "Please enter password";  
 
-                    valid = false;
+                valid = false;  
 
-                } else if (
-                    password.value.length < 8
-                ) {
+            } else if (  
+                password.value.length < 8  
+            ) {  
 
-                    passwordError.textContent =
-                        "Password must be at least 8 characters";
+                passwordError.textContent =  
+                    "Password must be at least 8 characters";  
 
-                    valid = false;
-                }
+                valid = false;  
+            }  
 
-                if (!valid) return;
+            if (!valid) return;  
 
-                const btn =
-                    document.getElementById("loginBtn");
+            const btn =  
+                document.getElementById("loginBtn");  
 
-                btn.disabled = true;
+            btn.disabled = true;  
 
-                btn.innerHTML =
-                    `<span class="spinner"></span> Signing In...`;
+            btn.innerHTML =  
+                `<span class="spinner"></span> Signing In...`;  
 
-                setTimeout(function () {
+            setTimeout(function () {  
 
-                    alert(
-setTimeout(function () {
+                alert(  
+                    "Login successful. Dashboard will be available in Phase 2."  
+                );  
 
-    // ✅ Redirect to dashboard AFTER login success
-    window.location.href = "dashboard.html";
+                btn.disabled = false;  
 
-                }, 1800);
-            }
-        );
-    }
+                btn.innerHTML =  
+                    `  
+                    <span>Sign In</span>  
+                    <span class="arrow">→</span>  
+                    `;  
+
+            }, 1800);  
+        }  
+    );  
+}
+
 );
 
 /* ==========================
-   FORGOT PASSWORD
+FORGOT PASSWORD
 ========================== */
 
 function sendResetLink() {
 
-    const username =
-        document.getElementById(
-            "forgotUsername"
-        );
+const username =  
+    document.getElementById(  
+        "forgotUsername"  
+    );  
 
-    const email =
-        document.getElementById(
-            "forgotEmail"
-        );
+const email =  
+    document.getElementById(  
+        "forgotEmail"  
+    );  
 
-    if (
-        !username ||
-        !email
-    ) return;
+if (  
+    !username ||  
+    !email  
+) return;  
 
-    if (
-        username.value.trim() === ""
-    ) {
+if (  
+    username.value.trim() === ""  
+) {  
 
-        alert(
-            "Please enter username."
-        );
+    alert(  
+        "Please enter username."  
+    );  
 
-        return;
-    }
+    return;  
+}  
 
-    if (
-        email.value.trim() === ""
-    ) {
+if (  
+    email.value.trim() === ""  
+) {  
 
-        alert(
-            "Please enter registered email."
-        );
+    alert(  
+        "Please enter registered email."  
+    );  
 
-        return;
-    }
+    return;  
+}  
 
-    const emailRegex =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailRegex =  
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  
 
-    if (
-        !emailRegex.test(
-            email.value.trim()
-        )
-    ) {
+if (  
+    !emailRegex.test(  
+        email.value.trim()  
+    )  
+) {  
 
-        alert(
-            "Please enter a valid email address."
-        );
+    alert(  
+        "Please enter a valid email address."  
+    );  
 
-        return;
-    }
+    return;  
+}  
 
-    alert(
-        "Password reset link sent successfully."
-    );
+alert(  
+    "Password reset link sent successfully."  
+);  
 
-    username.value = "";
-    email.value = "";
+username.value = "";  
+email.value = "";
+
 }
