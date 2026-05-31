@@ -1,177 +1,187 @@
 /* ==========================
-   PAYNEST APP.JS - FINAL CLEAN VERSION
-========================== */
-
-
-/* ==========================
    PASSWORD TOGGLE
 ========================== */
 
 function togglePassword() {
-    const password = document.getElementById("password");
+
+    const password =
+        document.getElementById("password");
+
     if (!password) return;
 
-    password.type =
-        password.type === "password"
-            ? "text"
-            : "password";
+    if (password.type === "password") {
+
+        password.type = "text";
+
+    } else {
+
+        password.type = "password";
+
+    }
 }
 
-
 /* ==========================
-   LOGIN HANDLER
+   LOGIN PAGE
 ========================== */
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-    const form = document.getElementById("loginForm");
-    const loader = document.getElementById("loader");
+        const loginForm =
+            document.getElementById("loginForm");
 
-    if (form) {
+        if (!loginForm) return;
 
-        form.addEventListener("submit", function (e) {
+        loginForm.addEventListener(
+            "submit",
+            function (e) {
 
-            e.preventDefault();
+                e.preventDefault();
 
-            const username = document.getElementById("username");
-            const password = document.getElementById("password");
+                const username =
+                    document.getElementById("username");
 
-            /* ALERT STYLE VALIDATION (RESTORED) */
+                const password =
+                    document.getElementById("password");
 
-            if (username.value.trim() === "") {
-                alert("Enter username");
-                return;
+                const usernameError =
+                    document.getElementById("usernameError");
+
+                const passwordError =
+                    document.getElementById("passwordError");
+
+                usernameError.textContent = "";
+                passwordError.textContent = "";
+
+                let valid = true;
+
+                /* Username */
+
+                if (
+                    username.value.trim() === ""
+                ) {
+
+                    usernameError.textContent =
+                        "Please enter username";
+
+                    valid = false;
+                }
+
+                /* Password */
+
+                if (
+                    password.value.trim() === ""
+                ) {
+
+                    passwordError.textContent =
+                        "Please enter password";
+
+                    valid = false;
+
+                } else if (
+                    password.value.length < 8
+                ) {
+
+                    passwordError.textContent =
+                        "Password must be at least 8 characters";
+
+                    valid = false;
+                }
+
+                if (!valid) return;
+
+                const btn =
+                    document.getElementById("loginBtn");
+
+                btn.disabled = true;
+
+                btn.innerHTML =
+                    `<span class="spinner"></span> Signing In...`;
+
+                setTimeout(function () {
+
+                    alert(
+                        "Login successful. Dashboard will be available in Phase 2."
+                    );
+
+                    btn.disabled = false;
+
+                    btn.innerHTML =
+                        `
+                        <span>Sign In</span>
+                        <span class="arrow">→</span>
+                        `;
+
+                }, 1800);
             }
+        );
+    }
+);
 
-            if (password.value.trim() === "") {
-                alert("Enter password");
-                return;
-            }
+/* ==========================
+   FORGOT PASSWORD
+========================== */
 
-            if (password.value.length < 8) {
-                alert("Password must be at least 8 characters");
-                return;
-            }
+function sendResetLink() {
 
-            /* SHOW LOADER */
-            if (loader) loader.classList.remove("hidden");
+    const username =
+        document.getElementById(
+            "forgotUsername"
+        );
 
-            setTimeout(() => {
+    const email =
+        document.getElementById(
+            "forgotEmail"
+        );
 
-                sessionStorage.setItem("paynest_user", username.value);
+    if (
+        !username ||
+        !email
+    ) return;
 
-                window.location.replace("dashboard.html");
+    if (
+        username.value.trim() === ""
+    ) {
 
-            }, 1200);
-        });
+        alert(
+            "Please enter username."
+        );
+
+        return;
     }
 
+    if (
+        email.value.trim() === ""
+    ) {
 
-    /* ==========================
-       FORGOT PASSWORD HANDLER (FIXED)
-    ========================== */
+        alert(
+            "Please enter registered email."
+        );
 
-    const resetBtn = document.getElementById("resetBtn");
-
-    if (resetBtn) {
-
-        resetBtn.addEventListener("click", function () {
-
-            const username =
-                document.getElementById("forgotUsername");
-
-            const email =
-                document.getElementById("forgotEmail");
-
-            if (!username || !email) return;
-
-            /* ALERT STYLE VALIDATION (RESTORED) */
-
-            if (username.value.trim() === "") {
-                alert("Enter username");
-                return;
-            }
-
-            if (email.value.trim() === "") {
-                alert("Enter email");
-                return;
-            }
-
-            /* EMAIL FORMAT CHECK */
-            const emailRegex =
-                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-            if (!emailRegex.test(email.value.trim())) {
-                alert("Enter valid email");
-                return;
-            }
-
-            alert("Reset link sent successfully.");
-        });
+        return;
     }
-});
 
+    const emailRegex =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/* ==========================
-   DASHBOARD CHARTS
-========================== */
+    if (
+        !emailRegex.test(
+            email.value.trim()
+        )
+    ) {
 
-if (document.getElementById("chart1")) {
+        alert(
+            "Please enter a valid email address."
+        );
 
-    new Chart(document.getElementById("chart1"), {
-        type: "line",
-        data: {
-            labels: ["Jan","Feb","Mar","Apr","May","Jun"],
-            datasets: [{
-                data: [10,20,15,30,25,40],
-                borderColor: "#7C3AED",
-                tension: 0.4
-            }]
-        }
-    });
+        return;
+    }
 
-    new Chart(document.getElementById("chart2"), {
-        type: "pie",
-        data: {
-            labels: ["Male","Female"],
-            datasets: [{
-                data: [60,40],
-                backgroundColor: ["#7C3AED","#EC4899"]
-            }]
-        }
-    });
+    alert(
+        "Password reset link sent successfully."
+    );
 
-    new Chart(document.getElementById("chart3"), {
-        type: "bar",
-        data: {
-            labels: ["20-30","30-40","40-50"],
-            datasets: [{
-                data: [30,50,20],
-                backgroundColor: "#7C3AED"
-            }]
-        }
-    });
-
-    new Chart(document.getElementById("chart4"), {
-        type: "line",
-        data: {
-            labels: ["Jan","Feb","Mar","Apr","May","Jun"],
-            datasets: [{
-                data: [100,120,140,130,150,170],
-                borderColor: "#EC4899"
-            }]
-        }
-    });
-}
-
-
-/* ==========================
-   LOGOUT FUNCTION
-========================== */
-
-function logout() {
-
-    sessionStorage.clear();
-
-    window.location.replace("index.html");
+    username.value = "";
+    email.value = "";
 }
