@@ -116,6 +116,7 @@ function initDashboard() {
   initChartScroll();
   initTasks();
   initPhotoUpload();
+  initGlobalSearch();
 }
 
 
@@ -195,7 +196,9 @@ function initSidebar() {
   const tooltip = $("sbTooltip");
   items.forEach(function (item) {
     item.addEventListener("mouseenter", function () {
+      /* Never show tooltip when sidebar is expanded, hovered-open, or pinned */
       if (sidebar.classList.contains("pinned")) return;
+      if (sidebar.matches(":hover")) return;
       const lbl = item.querySelector(".sb-label");
       if (!lbl) return;
       tooltip.textContent = lbl.textContent.trim();
@@ -626,6 +629,95 @@ function formatDate(iso) {
 
 function escHtml(str) {
   return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+
+/* ══════════════════════════════
+   GLOBAL SEARCH
+══════════════════════════════ */
+function initGlobalSearch() {
+  const input = $("globalSearch");
+  if (!input) return;
+
+  /* Build dropdown container */
+  const drop = document.createElement("div");
+  drop.id = "globalSearchDrop";
+  drop.style.cssText = "position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);z-index:9999;display:none;overflow:hidden;max-height:320px;overflow-y:auto;";
+  input.parentElement.style.position = "relative";
+  input.parentElement.appendChild(drop);
+
+  const EMP_KEY = "paynest_employees";
+  function getEmps() {
+    try { return JSON.parse(sessionStorage.getItem(EMP_KEY) || "[]"); } catch(e) { return []; }
+  }
+
+  input.addEventListener("input", function() {
+    const q = this.value.trim().toLowerCase();
+    drop.innerHTML = "";
+    if (!q) { drop.style.display = "none"; return; }
+
+    const emps = getEmps();
+    const hits = emps.filter(function(e) {
+      return (e.firstName + " " + e.lastName).toLowerCase().includes(q)
+          || (e.empCode || "").toLowerCase().includes(q)
+          || (e.dept   || "").toLowerCase().includes(q)
+          || (e.desig  || "").toLowerCase().includes(q)
+          || (e.email  || "").toLowerCase().includes(q);
+    }).slice(0, 8);
+
+    if (!hits.length) {
+      drop.innerHTML = '<div style="padding:14px 16px;font-size:13px;color:var(--muted);">No employees found</div>';
+      drop.style.display = "block";
+      return;
+    }
+
+    /* Section header */
+    drop.innerHTML = '<div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);">Employees</div>';
+
+    hits.forEach(function(e) {
+      const statusCls = e.status === "Active" ? "status-active" : e.status === "On Probation" ? "status-probation" : "status-inactive";
+      const avatarHtml = e.photo
+        ? '<img src="' + e.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />'
+        : (e.firstName[0] + e.lastName[0]);
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--bg);transition:background .15s;";
+      row.innerHTML =
+        '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#EC4899);color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">' + avatarHtml + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13px;font-weight:600;color:var(--text);">' + e.firstName + ' ' + e.lastName + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);">' + (e.empCode || e.id) + ' · ' + (e.desig || "—") + ' · ' + (e.dept || "—") + '</div>' +
+        '</div>' +
+        '<span class="status-badge ' + statusCls + '" style="flex-shrink:0;">' + e.status + '</span>';
+      row.addEventListener("mouseenter", function() { this.style.background = "rgba(124,58,237,.04)"; });
+      row.addEventListener("mouseleave", function() { this.style.background = ""; });
+      row.addEventListener("click", function() {
+        /* Navigate to employee profile */
+        window.location.href = "employees.html?profile=" + e.id;
+      });
+      drop.appendChild(row);
+    });
+
+    /* Footer link */
+    const footer = document.createElement("div");
+    footer.style.cssText = "padding:10px 16px;font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;border-top:1px solid var(--border);text-align:center;";
+    footer.textContent = "View all results in Employee Directory →";
+    footer.addEventListener("click", function() {
+      window.location.href = "employees.html?search=" + encodeURIComponent(input.value.trim());
+    });
+    drop.appendChild(footer);
+    drop.style.display = "block";
+  });
+
+  document.addEventListener("click", function(e) {
+    if (!input.parentElement.contains(e.target)) drop.style.display = "none";
+  });
+
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") { drop.style.display = "none"; input.blur(); }
+    if (e.key === "Enter" && this.value.trim()) {
+      window.location.href = "employees.html?search=" + encodeURIComponent(this.value.trim());
+    }
+  });
 }
 
 
