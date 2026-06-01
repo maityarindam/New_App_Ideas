@@ -420,6 +420,15 @@
       <!-- ════ TAB: PROFILE ════ -->
       <div class="tab-content" id="tab-profile">
 
+        <!-- Profile search -->
+        <div class="prof-search-row">
+          <div class="prof-search-wrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="profSearch" placeholder="Search employee by name or code..." autocomplete="off" />
+          </div>
+          <div class="prof-search-drop" id="profSearchDrop" style="display:none;"></div>
+        </div>
+
         <div class="prof-back-row" id="profBackRow">
           <button class="prof-back-btn" onclick="switchTab('directory')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -572,6 +581,27 @@
       <!-- Step 1: Personal -->
       <div class="drawer-step-panel active" id="dstep-1">
         <div class="drawer-step-title">Personal Details</div>
+
+        <!-- Photo upload -->
+        <div class="df-photo-section">
+          <div class="df-photo-wrap" onclick="document.getElementById('df-photoInput').click()">
+            <img id="df-photoPreview" src="" alt="Photo" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+            <div id="df-photoPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span style="font-size:11px;color:var(--muted);">Upload Photo</span>
+            </div>
+          </div>
+          <div class="df-photo-info">
+            <div style="font-size:13px;font-weight:600;color:var(--text);">Employee Photo</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">Click to upload. JPG, PNG (max 2MB)</div>
+            <button type="button" class="df-photo-btn" onclick="document.getElementById('df-photoInput').click()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Choose File
+            </button>
+            <input type="file" id="df-photoInput" accept="image/*" style="display:none" onchange="handleEmpPhotoUpload(this)" />
+          </div>
+        </div>
+
         <div class="drawer-form-grid">
           <div class="dform-group full">
             <label>Employee Code <span class="req">*</span></label>
