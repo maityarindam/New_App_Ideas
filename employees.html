@@ -584,19 +584,18 @@
 
         <!-- Photo upload -->
         <div class="df-photo-section">
-          <div class="df-photo-wrap" onclick="document.getElementById('df-photoInput').click()">
+          <div class="df-photo-circle" onclick="document.getElementById('df-photoInput').click()">
             <img id="df-photoPreview" src="" alt="Photo" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
-            <div id="df-photoPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-              <span style="font-size:11px;color:var(--muted);">Upload Photo</span>
+            <div id="df-photoPlaceholder">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             </div>
           </div>
           <div class="df-photo-info">
-            <div style="font-size:13px;font-weight:600;color:var(--text);">Employee Photo</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:3px;">Click to upload. JPG, PNG (max 2MB)</div>
+            <div class="df-photo-title">Employee Photo</div>
+            <div class="df-photo-hint">JPG or PNG, max 2MB. Click the circle or the button to upload.</div>
             <button type="button" class="df-photo-btn" onclick="document.getElementById('df-photoInput').click()">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Choose File
+              Upload Photo
             </button>
             <input type="file" id="df-photoInput" accept="image/*" style="display:none" onchange="handleEmpPhotoUpload(this)" />
           </div>
