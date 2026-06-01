@@ -6,6 +6,15 @@
     </linearGradient>
   </defs>
 
+  <!-- White Circular Badge -->
+  <circle
+    cx="35"
+    cy="35"
+    r="34"
+    fill="white"
+  />
+
+  <!-- Outer Circle -->
   <circle
     cx="35"
     cy="35"
@@ -15,11 +24,13 @@
     stroke-width="4"
   />
 
+  <!-- Nest Curves -->
   <path
     d="M15 42 C25 55,45 55,55 42"
     fill="none"
     stroke="url(#g)"
     stroke-width="4"
+    stroke-linecap="round"
   />
 
   <path
@@ -27,14 +38,17 @@
     fill="none"
     stroke="url(#g)"
     stroke-width="4"
+    stroke-linecap="round"
   />
 
+  <!-- Rupee Symbol -->
   <text
     x="29"
     y="41"
     font-size="22"
     font-weight="bold"
     fill="url(#g)"
+    font-family="Arial, sans-serif"
   >
     ₹
   </text>
