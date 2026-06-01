@@ -149,6 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initTopbarEmp();
   initDarkModeEmp();
   initProfSearch();
+  initGlobalSearchEmp();
 
   /* Module tab nav */
   document.querySelectorAll(".emp-tab").forEach(function (btn) {
@@ -178,6 +179,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   /* Initial render */
   switchTab("overview");
+
+  /* Handle URL params */
+  var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("action") === "add") {
+    switchTab("directory");
+    setTimeout(openAddDrawer, 200);
+    history.replaceState(null, "", window.location.pathname);
+  } else if (urlParams.get("profile")) {
+    viewProfile(urlParams.get("profile"));
+    history.replaceState(null, "", window.location.pathname);
+  } else if (urlParams.get("search")) {
+    switchTab("directory");
+    var srchEl = document.getElementById("dirSearch");
+    if (srchEl) {
+      srchEl.value = urlParams.get("search");
+      filterDirectory();
+    }
+    history.replaceState(null, "", window.location.pathname);
+  }
 });
 
 /* ══════════════════════════════
@@ -205,6 +225,7 @@ function initSidebarEmp() {
     sidebar.querySelectorAll(".sb-item").forEach(function (item) {
       item.addEventListener("mouseenter", function () {
         if (sidebar.classList.contains("pinned")) return;
+        if (sidebar.matches(":hover")) return;
         const lbl = item.querySelector(".sb-label");
         if (!lbl) return;
         tooltip.textContent = lbl.textContent.trim();
@@ -348,6 +369,53 @@ function renderOverview() {
   renderAnniversaries(emps);
   renderConfirmationDue(emps, today);
   renderRecentJoiners(emps, today);
+}
+
+function statCardClick(filter) {
+  /* Switch to directory and apply the right filter */
+  switchTab("directory");
+  var emps  = getEmployees();
+  var today = new Date();
+
+  /* Reset all filters first */
+  var srch = document.getElementById("dirSearch");
+  var fdep = document.getElementById("filterDept");
+  var fdes = document.getElementById("filterDesig");
+  var fst  = document.getElementById("filterStatus");
+  if (srch) srch.value = "";
+  if (fdep) fdep.value = "";
+  if (fdes) fdes.value = "";
+  if (fst)  fst.value  = "";
+
+  if (filter === "all") {
+    filteredEmployees = emps;
+  } else if (filter === "Active" || filter === "On Probation" || filter === "Inactive") {
+    if (fst) fst.value = filter;
+    filteredEmployees = emps.filter(function(e) { return e.status === filter; });
+  } else if (filter === "joiners") {
+    filteredEmployees = emps.filter(function(e) {
+      if (!e.doj) return false;
+      var d = new Date(e.doj);
+      return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    });
+    /* Show "This Month Joiners" in search box as label */
+    if (srch) srch.value = "";
+  } else if (filter === "confirm") {
+    filteredEmployees = emps.filter(function(e) {
+      if (e.status !== "On Probation" || !e.doj) return false;
+      var conf = new Date(e.doj);
+      conf.setDate(conf.getDate() + 90);
+      var diff = Math.round((conf - today) / (1000*60*60*24));
+      return diff >= 0 && diff <= 30;
+    });
+  } else if (filter === "depts") {
+    filteredEmployees = emps;
+  } else {
+    filteredEmployees = emps;
+  }
+
+  dirPage = 1;
+  renderDirTable();
 }
 
 function renderHeadcountChart(emps) {
@@ -800,8 +868,96 @@ function profileFields(pairs) {
 }
 
 /* ══════════════════════════════
-   PROFILE SEARCH
+   GLOBAL SEARCH (employees page)
 ══════════════════════════════ */
+function initGlobalSearchEmp() {
+  var input = document.getElementById("globalSearch");
+  if (!input) return;
+
+  var drop = document.createElement("div");
+  drop.id = "globalSearchDrop";
+  drop.style.cssText = "position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);z-index:9999;display:none;overflow:hidden;max-height:320px;overflow-y:auto;";
+  input.parentElement.style.position = "relative";
+  input.parentElement.appendChild(drop);
+
+  input.addEventListener("input", function() {
+    var q = this.value.trim().toLowerCase();
+    drop.innerHTML = "";
+    if (!q) { drop.style.display = "none"; return; }
+
+    var emps = getEmployees();
+    var hits = emps.filter(function(e) {
+      return (e.firstName + " " + e.lastName).toLowerCase().includes(q)
+          || (e.empCode || "").toLowerCase().includes(q)
+          || (e.dept   || "").toLowerCase().includes(q)
+          || (e.desig  || "").toLowerCase().includes(q)
+          || (e.email  || "").toLowerCase().includes(q);
+    }).slice(0, 8);
+
+    if (!hits.length) {
+      drop.innerHTML = '<div style="padding:14px 16px;font-size:13px;color:var(--muted);">No employees found</div>';
+      drop.style.display = "block";
+      return;
+    }
+
+    drop.innerHTML = '<div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);">Employees</div>';
+
+    hits.forEach(function(e) {
+      var statusCls = e.status === "Active" ? "status-active" : e.status === "On Probation" ? "status-probation" : "status-inactive";
+      var av = e.photo
+        ? '<img src="' + e.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />'
+        : (e.firstName[0] + e.lastName[0]);
+      var row = document.createElement("div");
+      row.style.cssText = "display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--bg);transition:background .15s;";
+      row.innerHTML =
+        '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#EC4899);color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">' + av + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13px;font-weight:600;color:var(--text);">' + e.firstName + ' ' + e.lastName + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);">' + (e.empCode || e.id) + ' · ' + (e.desig || "—") + ' · ' + (e.dept || "—") + '</div>' +
+        '</div>' +
+        '<span class="status-badge ' + statusCls + '" style="flex-shrink:0;">' + e.status + '</span>';
+      row.addEventListener("mouseenter", function() { this.style.background = "rgba(124,58,237,.04)"; });
+      row.addEventListener("mouseleave", function() { this.style.background = ""; });
+      row.addEventListener("click", function() {
+        drop.style.display = "none";
+        input.value = "";
+        viewProfile(e.id);
+      });
+      drop.appendChild(row);
+    });
+
+    var footer = document.createElement("div");
+    footer.style.cssText = "padding:10px 16px;font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;border-top:1px solid var(--border);text-align:center;";
+    footer.textContent = "Show all results in Directory →";
+    footer.addEventListener("click", function() {
+      drop.style.display = "none";
+      switchTab("directory");
+      var srchEl = document.getElementById("dirSearch");
+      if (srchEl) { srchEl.value = input.value.trim(); filterDirectory(); }
+      input.value = "";
+    });
+    drop.appendChild(footer);
+    drop.style.display = "block";
+  });
+
+  document.addEventListener("click", function(e) {
+    if (!input.parentElement.contains(e.target)) drop.style.display = "none";
+  });
+
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") { drop.style.display = "none"; input.blur(); }
+    if (e.key === "Enter" && this.value.trim()) {
+      drop.style.display = "none";
+      switchTab("directory");
+      var srchEl = document.getElementById("dirSearch");
+      if (srchEl) { srchEl.value = this.value.trim(); filterDirectory(); }
+      this.value = "";
+    }
+  });
+}
+
+
+
 function initProfSearch() {
   const input = document.getElementById("profSearch");
   const drop  = document.getElementById("profSearchDrop");
