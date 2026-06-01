@@ -682,6 +682,8 @@ function viewAndEdit(id) {
   /* Small delay to let profile render before opening drawer */
   setTimeout(function() { openEditDrawerById(id); }, 80);
 }
+
+function renderProfile() {
   const emptyState  = document.getElementById("profEmptyState");
   const profHero    = document.getElementById("profHero");
   const profTabsBar = document.getElementById("profTabsBar");
@@ -1002,7 +1004,7 @@ function handleEmpPhotoUpload(input) {
   reader.readAsDataURL(file);
 }
 
-
+function closeDrawer() {
   document.getElementById("empDrawer").classList.remove("open");
   document.getElementById("drawerOverlay").classList.remove("open");
   document.body.style.overflow = "";
