@@ -853,57 +853,57 @@ function selectProfSearch(id) {
    ORG TREE
 ══════════════════════════════ */
 function renderOrgTree() {
-  const wrap = document.getElementById("orgTreeWrap");
+  var wrap = document.getElementById("orgTreeWrap");
   if (!wrap) return;
 
-  const emps = getEmployees();
+  var emps = getEmployees();
 
-  /* Colour palette per level */
-  const levelColors = [
-    { bg:"#7C3AED", light:"rgba(124,58,237,.08)", border:"#7C3AED" },
-    { bg:"#EC4899", light:"rgba(236,72,153,.08)",  border:"#EC4899" },
-    { bg:"#06B6D4", light:"rgba(6,182,212,.08)",   border:"#06B6D4" },
-    { bg:"#10B981", light:"rgba(16,185,129,.08)",  border:"#10B981" },
-    { bg:"#F59E0B", light:"rgba(245,158,11,.08)",  border:"#F59E0B" },
+  var levelColors = [
+    { avatar:"#7C3AED", desig:"#7C3AED", badge:"rgba(124,58,237,.1)", badgeText:"#7C3AED" },
+    { avatar:"#06B6D4", desig:"#06B6D4", badge:"rgba(6,182,212,.1)",  badgeText:"#06B6D4" },
+    { avatar:"#F59E0B", desig:"#F59E0B", badge:"rgba(245,158,11,.1)", badgeText:"#F59E0B" },
+    { avatar:"#10B981", desig:"#10B981", badge:"rgba(16,185,129,.1)", badgeText:"#10B981" },
   ];
-
   function lc(depth) { return levelColors[Math.min(depth, levelColors.length - 1)]; }
 
-  const allNames = emps.map(e => (e.firstName + " " + e.lastName).toLowerCase());
-  const roots    = emps.filter(e => {
-    if (!e.manager || !e.manager.trim()) return true;
-    return !allNames.includes(e.manager.toLowerCase());
+  var allNames = emps.map(function(e) { return (e.firstName + " " + e.lastName).toLowerCase(); });
+  var roots = emps.filter(function(e) {
+    return !e.manager || !e.manager.trim() || !allNames.includes(e.manager.toLowerCase());
   });
 
-  function buildNode(emp, depth) {
-    const directReports = emps.filter(e =>
-      e.manager && e.manager.toLowerCase() === (emp.firstName + " " + emp.lastName).toLowerCase()
-    );
-    const c = lc(depth);
-    const hasChildren = directReports.length > 0;
-    const avatarContent = emp.photo
+  function buildCard(emp, depth) {
+    var c = lc(depth);
+    var av = emp.photo
       ? '<img src="' + emp.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />'
       : (emp.firstName[0] + emp.lastName[0]);
-
-    const childNodes = directReports.map(child => buildNode(child, depth + 1)).join("");
-
-    return `
-      <div class="org-node-wrap">
-        <div class="org-node-card" style="border-top:3px solid ${c.border};background:var(--white);" onclick="viewProfile('${emp.id}')">
-          <div class="org-node-avatar" style="background:${c.bg};">${avatarContent}</div>
-          <div class="org-node-body">
-            <div class="org-node-name">${emp.firstName} ${emp.lastName}</div>
-            <div class="org-node-desig" style="color:${c.bg};">${emp.desig || "—"}</div>
-            <div class="org-node-dept">${emp.dept || "—"}</div>
-            ${hasChildren ? '<div class="org-node-count" style="background:'+c.light+';color:'+c.bg+';">' + directReports.length + ' direct report' + (directReports.length>1?'s':'') + '</div>' : ''}
-          </div>
-        </div>
-        ${hasChildren ? `<div class="org-children-wrap"><div class="org-connector-line"></div><div class="org-children-row">${childNodes}</div></div>` : ''}
-      </div>
-    `;
+    return '<div class="org-node-card" onclick="viewProfile(\'' + emp.id + '\')">' +
+        '<div class="org-node-avatar" style="background:' + c.avatar + ';">' + av + '</div>' +
+        '<div class="org-node-body">' +
+          '<div class="org-node-name">' + emp.firstName + ' ' + emp.lastName + '</div>' +
+          '<div class="org-node-desig" style="color:' + c.desig + ';">' + (emp.desig || '\u2014') + '</div>' +
+          '<span class="org-node-dept-badge" style="background:' + c.badge + ';color:' + c.badgeText + ';">' + (emp.dept || '\u2014') + '</span>' +
+        '</div>' +
+      '</div>';
   }
 
-  const treeHtml = roots.map(r => buildNode(r, 0)).join("");
+  function buildNode(emp, depth) {
+    var reports = emps.filter(function(e) {
+      return e.manager && e.manager.toLowerCase() === (emp.firstName + " " + emp.lastName).toLowerCase();
+    });
+    var html = '<div class="org-node-wrap' + (depth === 0 ? ' org-root' : '') + '">';
+    html += buildCard(emp, depth);
+    if (reports.length) {
+      html += '<div class="org-v-line"></div><div class="org-h-row">';
+      reports.forEach(function(child) {
+        html += '<div class="org-child-col">' + buildNode(child, depth + 1) + '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  var treeHtml = roots.map(function(r) { return buildNode(r, 0); }).join("");
   wrap.innerHTML = '<div class="org-tree-root">' + treeHtml + '</div>';
 }
 
