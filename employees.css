@@ -823,3 +823,82 @@ body.dark-mode .dform-group input,
 body.dark-mode .dform-group select { background: #211f33; border-color: var(--border); color: #D1D5DB; }
 body.dark-mode .modal-box { background: var(--white); }
 body.dark-mode .modal-box h3 { color: #F3F4F6; }
+
+/* ══════════════════════════════
+   ORG TREE
+══════════════════════════════ */
+.org-tree {
+  display: flex;
+  gap: 32px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 8px 0 16px;
+  flex-wrap: wrap;
+}
+.org-node-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.org-node {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-top: 3px solid var(--node-color, #7C3AED);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-sm);
+  min-width: 200px;
+  transition: box-shadow .2s;
+}
+.org-node:hover { box-shadow: var(--shadow); }
+.org-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  color: white;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.org-name  { font-size: 13px; font-weight: 700; color: var(--text); }
+.org-desig { font-size: 11px; color: var(--primary); font-weight: 600; }
+.org-dept  { font-size: 10px; color: var(--muted); }
+.org-children {
+  display: flex;
+  gap: 20px;
+  padding-top: 24px;
+  justify-content: center;
+  position: relative;
+}
+.org-children::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  width: 2px; height: 24px;
+  background: var(--border);
+  transform: translateX(-50%);
+}
+.org-children > .org-node-wrap {
+  position: relative;
+}
+.org-children > .org-node-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  width: 2px; height: 24px;
+  background: var(--border);
+  transform: translateX(-50%);
+}
+
+/* Org Tree tab is now enabled — override disabled style for 'org' only */
+.emp-tab[data-tab="org"] {
+  opacity: 1 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* Dark mode */
+body.dark-mode .org-node { background: var(--white); border-color: var(--border); }
+body.dark-mode .org-name { color: #F3F4F6; }
