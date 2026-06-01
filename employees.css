@@ -76,6 +76,23 @@
   transition: box-shadow .2s;
 }
 .ov-stat-card:hover { box-shadow: var(--shadow); }
+.ov-stat-clickable {
+  cursor: pointer;
+}
+.ov-stat-clickable:hover {
+  box-shadow: var(--shadow);
+  border-color: var(--primary-light);
+  transform: translateY(-1px);
+}
+.ov-stat-clickable::after {
+  content: '→';
+  position: absolute;
+  right: 12px; bottom: 10px;
+  font-size: 12px; color: var(--primary);
+  opacity: 0; transition: opacity .18s;
+}
+.ov-stat-card { position: relative; }
+.ov-stat-clickable:hover::after { opacity: 1; }
 
 .ov-stat-icon {
   width: 42px; height: 42px;
