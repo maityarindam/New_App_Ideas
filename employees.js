@@ -133,6 +133,7 @@ let filteredEmployees = [];
 
 let ovHeadcountChart = null;
 let ovGenderChart    = null;
+let profSearchResults = [];
 
 /* ══════════════════════════════
    INIT
@@ -147,6 +148,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initSidebarEmp();
   initTopbarEmp();
   initDarkModeEmp();
+  initProfSearch();
 
   /* Module tab nav */
   document.querySelectorAll(".emp-tab").forEach(function (btn) {
@@ -611,7 +613,7 @@ function renderDirTable() {
                   e.status === "On Probation" ? "status-probation" : "status-inactive";
       return '<tr>' +
         '<td>' + (start + i + 1) + '</td>' +
-        '<td><div class="dir-emp-avatar">' + e.firstName[0] + e.lastName[0] + '</div></td>' +
+        '<td><div class="dir-emp-avatar">' + (e.photo ? '<img src="'+e.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />' : e.firstName[0]+e.lastName[0]) + '</div></td>' +
         '<td style="font-weight:600;color:var(--primary)">' + (e.empCode || e.id) + '</td>' +
         '<td><span class="dir-emp-name">' + e.firstName + ' ' + e.lastName + '</span></td>' +
         '<td>' + (e.dept  || "—") + '</td>' +
@@ -622,7 +624,7 @@ function renderDirTable() {
           '<button class="dir-action-btn" title="View Profile" onclick="viewProfile(\'' + e.id + '\')">' +
             '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' +
           '</button>' +
-          '<button class="dir-action-btn" title="Edit" onclick="openEditDrawerById(\'' + e.id + '\')">' +
+          '<button class="dir-action-btn" title="Edit" onclick="viewAndEdit(\'' + e.id + '\')">' +
             '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
           '</button>' +
           '<button class="dir-action-btn danger" title="Delete" onclick="openDeleteModal(\'' + e.id + '\')">' +
@@ -662,10 +664,24 @@ function changeDirPage(p) {
 ══════════════════════════════ */
 function viewProfile(id) {
   currentProfileId = id;
+  /* Pre-fill profile search with employee name */
+  const emps = getEmployees();
+  const emp  = emps.find(e => e.id === id);
+  if (emp) {
+    const psEl = document.getElementById("profSearch");
+    if (psEl) psEl.value = emp.firstName + " " + emp.lastName;
+    profSearchResults = [];
+    const psDropEl = document.getElementById("profSearchDrop");
+    if (psDropEl) psDropEl.style.display = "none";
+  }
   switchTab("profile");
 }
 
-function renderProfile() {
+function viewAndEdit(id) {
+  viewProfile(id);
+  /* Small delay to let profile render before opening drawer */
+  setTimeout(function() { openEditDrawerById(id); }, 80);
+}
   const emptyState  = document.getElementById("profEmptyState");
   const profHero    = document.getElementById("profHero");
   const profTabsBar = document.getElementById("profTabsBar");
@@ -691,8 +707,17 @@ function renderProfile() {
   const emp  = emps.find(e => e.id === currentProfileId);
   if (!emp) return;
 
-  setText("profAvatar", emp.firstName[0] + emp.lastName[0]);
   setText("profName",   emp.firstName + " " + emp.lastName);
+
+  /* Avatar — photo or initials */
+  const avatarEl = document.getElementById("profAvatar");
+  if (avatarEl) {
+    if (emp.photo) {
+      avatarEl.innerHTML = '<img src="' + emp.photo + '" alt="Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+    } else {
+      avatarEl.textContent = emp.firstName[0] + emp.lastName[0];
+    }
+  }
 
   const badgeBg = emp.status === "Active" ? "#10B981" :
                   emp.status === "On Probation" ? "#F59E0B" : "#6B7280";
@@ -773,6 +798,56 @@ function profileFields(pairs) {
 }
 
 /* ══════════════════════════════
+   PROFILE SEARCH
+══════════════════════════════ */
+function initProfSearch() {
+  const input = document.getElementById("profSearch");
+  const drop  = document.getElementById("profSearchDrop");
+  if (!input || !drop) return;
+
+  input.addEventListener("input", function () {
+    const q = this.value.trim().toLowerCase();
+    if (!q) { drop.style.display = "none"; profSearchResults = []; return; }
+    const emps = getEmployees();
+    profSearchResults = emps.filter(e =>
+      (e.firstName + " " + e.lastName).toLowerCase().includes(q) ||
+      (e.empCode || e.id).toLowerCase().includes(q)
+    ).slice(0, 8);
+
+    if (!profSearchResults.length) { drop.style.display = "none"; return; }
+    drop.innerHTML = profSearchResults.map(e => `
+      <div class="prof-search-item" onclick="selectProfSearch('${e.id}')">
+        <div class="prof-search-avatar">${e.photo ? '<img src="'+e.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />' : e.firstName[0]+e.lastName[0]}</div>
+        <div>
+          <div class="prof-search-name">${e.firstName} ${e.lastName}</div>
+          <div class="prof-search-meta">${e.empCode||e.id} · ${e.desig||"—"} · ${e.dept||"—"}</div>
+        </div>
+        <span class="status-badge ${e.status==='Active'?'status-active':e.status==='On Probation'?'status-probation':'status-inactive'}" style="margin-left:auto;flex-shrink:0">${e.status}</span>
+      </div>
+    `).join("");
+    drop.style.display = "block";
+  });
+
+  document.addEventListener("click", function (e) {
+    if (!input.contains(e.target) && !drop.contains(e.target)) {
+      drop.style.display = "none";
+    }
+  });
+}
+
+function selectProfSearch(id) {
+  const emps = getEmployees();
+  const emp  = emps.find(e => e.id === id);
+  if (!emp) return;
+  currentProfileId = id;
+  const input = document.getElementById("profSearch");
+  const drop  = document.getElementById("profSearchDrop");
+  if (input) input.value = emp.firstName + " " + emp.lastName;
+  if (drop)  drop.style.display = "none";
+  renderProfile();
+}
+
+/* ══════════════════════════════
    ORG TREE
 ══════════════════════════════ */
 function renderOrgTree() {
@@ -781,45 +856,53 @@ function renderOrgTree() {
 
   const emps = getEmployees();
 
-  /* Build hierarchy: manager → direct reports */
-  function getInitials(e) { return e.firstName[0] + e.lastName[0]; }
-  function getColor(i) {
-    const colors = ["#7C3AED","#EC4899","#10B981","#F59E0B","#06B6D4","#EF4444","#8B5CF6","#3B82F6"];
-    return colors[i % colors.length];
-  }
+  /* Colour palette per level */
+  const levelColors = [
+    { bg:"#7C3AED", light:"rgba(124,58,237,.08)", border:"#7C3AED" },
+    { bg:"#EC4899", light:"rgba(236,72,153,.08)",  border:"#EC4899" },
+    { bg:"#06B6D4", light:"rgba(6,182,212,.08)",   border:"#06B6D4" },
+    { bg:"#10B981", light:"rgba(16,185,129,.08)",  border:"#10B981" },
+    { bg:"#F59E0B", light:"rgba(245,158,11,.08)",  border:"#F59E0B" },
+  ];
 
-  /* Find roots — employees with no manager or manager not in list */
+  function lc(depth) { return levelColors[Math.min(depth, levelColors.length - 1)]; }
+
   const allNames = emps.map(e => (e.firstName + " " + e.lastName).toLowerCase());
   const roots    = emps.filter(e => {
     if (!e.manager || !e.manager.trim()) return true;
     return !allNames.includes(e.manager.toLowerCase());
   });
 
-  function buildNode(emp, depth, empIndex) {
+  function buildNode(emp, depth) {
     const directReports = emps.filter(e =>
       e.manager && e.manager.toLowerCase() === (emp.firstName + " " + emp.lastName).toLowerCase()
     );
-    const color = getColor(empIndex);
-    const childNodes = directReports.map((child, ci) => buildNode(child, depth + 1, empIndex * 10 + ci + 1)).join("");
+    const c = lc(depth);
     const hasChildren = directReports.length > 0;
+    const avatarContent = emp.photo
+      ? '<img src="' + emp.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />'
+      : (emp.firstName[0] + emp.lastName[0]);
+
+    const childNodes = directReports.map(child => buildNode(child, depth + 1)).join("");
 
     return `
       <div class="org-node-wrap">
-        <div class="org-node" style="--node-color:${color}">
-          <div class="org-avatar" style="background:${color}">${getInitials(emp)}</div>
-          <div class="org-info">
-            <div class="org-name">${emp.firstName} ${emp.lastName}</div>
-            <div class="org-desig">${emp.desig || "—"}</div>
-            <div class="org-dept">${emp.dept || "—"}</div>
+        <div class="org-node-card" style="border-top:3px solid ${c.border};background:var(--white);" onclick="viewProfile('${emp.id}')">
+          <div class="org-node-avatar" style="background:${c.bg};">${avatarContent}</div>
+          <div class="org-node-body">
+            <div class="org-node-name">${emp.firstName} ${emp.lastName}</div>
+            <div class="org-node-desig" style="color:${c.bg};">${emp.desig || "—"}</div>
+            <div class="org-node-dept">${emp.dept || "—"}</div>
+            ${hasChildren ? '<div class="org-node-count" style="background:'+c.light+';color:'+c.bg+';">' + directReports.length + ' direct report' + (directReports.length>1?'s':'') + '</div>' : ''}
           </div>
         </div>
-        ${hasChildren ? '<div class="org-children">' + childNodes + '</div>' : ''}
+        ${hasChildren ? `<div class="org-children-wrap"><div class="org-connector-line"></div><div class="org-children-row">${childNodes}</div></div>` : ''}
       </div>
     `;
   }
 
-  const treeHtml = roots.map((r, i) => buildNode(r, 0, i)).join("");
-  wrap.innerHTML = '<div class="org-tree">' + treeHtml + '</div>';
+  const treeHtml = roots.map(r => buildNode(r, 0)).join("");
+  wrap.innerHTML = '<div class="org-tree-root">' + treeHtml + '</div>';
 }
 
 /* ══════════════════════════════
@@ -867,6 +950,20 @@ function fillDrawerForm(emp) {
     "df-bank":emp.bank,"df-ifsc":emp.ifsc
   };
   Object.keys(map).forEach(id => setVal(id, map[id]));
+  /* Show existing photo if available */
+  const preview = document.getElementById("df-photoPreview");
+  const placeholder = document.getElementById("df-photoPlaceholder");
+  if (preview && placeholder) {
+    if (emp.photo) {
+      preview.src = emp.photo;
+      preview.style.display = "block";
+      placeholder.style.display = "none";
+    } else {
+      preview.src = "";
+      preview.style.display = "none";
+      placeholder.style.display = "flex";
+    }
+  }
 }
 
 function clearDrawerForm() {
@@ -876,6 +973,13 @@ function clearDrawerForm() {
    "df-pan","df-aadhaar","df-uan","df-esi","df-bank","df-ifsc"
   ].forEach(id => setVal(id, ""));
   setVal("df-status", "Active");
+  /* Reset photo */
+  const preview = document.getElementById("df-photoPreview");
+  const placeholder = document.getElementById("df-photoPlaceholder");
+  const photoInput = document.getElementById("df-photoInput");
+  if (preview)     { preview.src = ""; preview.style.display = "none"; }
+  if (placeholder) placeholder.style.display = "flex";
+  if (photoInput)  photoInput.value = "";
 }
 
 function openDrawer() {
@@ -884,7 +988,21 @@ function openDrawer() {
   document.body.style.overflow = "hidden";
 }
 
-function closeDrawer() {
+function handleEmpPhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const src = e.target.result;
+    const preview     = document.getElementById("df-photoPreview");
+    const placeholder = document.getElementById("df-photoPlaceholder");
+    if (preview)     { preview.src = src; preview.style.display = "block"; }
+    if (placeholder) placeholder.style.display = "none";
+  };
+  reader.readAsDataURL(file);
+}
+
+
   document.getElementById("empDrawer").classList.remove("open");
   document.getElementById("drawerOverlay").classList.remove("open");
   document.body.style.overflow = "";
@@ -943,6 +1061,9 @@ function updateDrawerStepUI() {
 
 function saveDrawerEmployee() {
   const emps = getEmployees();
+  const photoPreview = document.getElementById("df-photoPreview");
+  const photoSrc = photoPreview && photoPreview.src && photoPreview.src.startsWith("data:") ? photoPreview.src : null;
+
   const data = {
     empCode:getVal("df-empCode"),firstName:getVal("df-firstName"),lastName:getVal("df-lastName"),
     gender:getVal("df-gender"),dob:getVal("df-dob"),marital:getVal("df-marital"),blood:getVal("df-blood"),
@@ -959,19 +1080,27 @@ function saveDrawerEmployee() {
     const newId = nextEmpId(emps);
     data.id = newId;
     if (!data.empCode) data.empCode = newId;
+    if (photoSrc) data.photo = photoSrc;
     emps.push(data);
+    saveEmployees(emps);
     showToast("Employee added successfully!", "success");
+    closeDrawer();
+    /* Go directly to new employee's profile */
+    viewProfile(newId);
   } else {
     const idx = emps.findIndex(e => e.id === currentProfileId);
-    if (idx !== -1) { data.id = currentProfileId; emps[idx] = data; }
+    if (idx !== -1) {
+      data.id = currentProfileId;
+      /* Preserve existing photo if no new one uploaded */
+      data.photo = photoSrc || emps[idx].photo || null;
+      emps[idx] = data;
+    }
+    saveEmployees(emps);
     showToast("Employee updated successfully!", "success");
+    closeDrawer();
+    /* Return to profile view */
+    renderProfile();
   }
-
-  saveEmployees(emps);
-  closeDrawer();
-  if (currentTab === "overview")  renderOverview();
-  if (currentTab === "directory") { populateFilterDropdowns(); filterDirectory(); }
-  if (currentTab === "profile")   renderProfile();
 }
 
 /* ══════════════════════════════
