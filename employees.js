@@ -8,6 +8,49 @@
 ══════════════════════════════ */
 const EMP_KEY = "paynest_employees";
 
+/* ══════════════════════════════
+   MASTERS HELPER
+   Reads from masters.js sessionStorage key.
+   Falls back to built-in defaults so employees.js
+   works even if masters.js hasn't run yet.
+══════════════════════════════ */
+const MASTER_STORAGE_KEY = "paynest_masters";
+
+const MASTER_FALLBACKS = {
+  gender:      ["Male","Female","Other","Prefer not to say"],
+  status:      ["Active","On Probation","Inactive","On Leave","Resigned","Terminated"],
+  empType:     ["Full-Time","Part-Time","Contract","Intern","Freelance","Consultant"],
+  department:  ["Payroll","HR","Finance","IT","Operations","Sales","Marketing","Admin"],
+  designation: ["CEO","CTO","Manager","Senior Manager","Executive","Senior Executive","Analyst","Senior Analyst","Developer","Senior Developer","Coordinator","Sales Executive","Intern"],
+  blood:       ["A+","A-","B+","B-","O+","O-","AB+","AB-"],
+  marital:     ["Single","Married","Divorced","Widowed","Separated"],
+  location:    ["Kolkata","Mumbai","Delhi","Bengaluru","Ahmedabad","Chennai","Hyderabad","Pune","Lucknow","Jaipur"]
+};
+
+function getMasterValues(key) {
+  try {
+    var raw = sessionStorage.getItem(MASTER_STORAGE_KEY);
+    if (raw) {
+      var all  = JSON.parse(raw);
+      var list = all[key] || [];
+      var active = list.filter(function(m){ return m.active !== false; }).map(function(m){ return m.value; });
+      if (active.length) return active;
+    }
+  } catch(e) {}
+  return MASTER_FALLBACKS[key] || [];
+}
+
+/* Populate a <select> element from a master key */
+function populateMasterSelect(selectId, masterKey, blankLabel) {
+  var el = document.getElementById(selectId);
+  if (!el) return;
+  var current = el.value;
+  var values  = getMasterValues(masterKey);
+  el.innerHTML = '<option value="">' + (blankLabel || "Select " + masterKey) + '</option>' +
+    values.map(function(v){ return '<option value="'+v+'">' + v + '</option>'; }).join("");
+  if (current) el.value = current; /* restore selected value */
+}
+
 const SEED_EMPLOYEES = [
   {
     id:"EMP001",empCode:"EMP001",
@@ -1394,10 +1437,132 @@ function renderOrgTree() {
 /* ══════════════════════════════
    ADD / EDIT DRAWER
 ══════════════════════════════ */
+/* ══════════════════════════════
+   POPULATE DRAWER DROPDOWNS FROM MASTERS
+   excludeId: employee being edited (excluded from manager list)
+══════════════════════════════ */
+function populateDrawerDropdowns(excludeId) {
+  populateMasterSelect("df-gender",  "gender",  "Select gender");
+  populateMasterSelect("df-marital", "marital", "Select");
+  populateMasterSelect("df-blood",   "blood",   "Select");
+  populateMasterSelect("df-dept",    "department", "Select department");
+  populateMasterSelect("df-empType", "empType", "Select type");
+  populateMasterSelect("df-status",  "status",  "Select status");
+
+  /* Designation is a free-text input, but populate its datalist */
+  populateDesigDatalist();
+
+  /* Location datalist */
+  populateLocationDatalist();
+
+  /* Reporting Manager — employee picker */
+  initManagerPicker(excludeId);
+}
+
+function populateDesigDatalist() {
+  var dl = document.getElementById("df-desig-list");
+  if (!dl) return;
+  var vals = getMasterValues("designation");
+  dl.innerHTML = vals.map(function(v){ return '<option value="'+v+'">'; }).join("");
+}
+
+function populateLocationDatalist() {
+  var dl = document.getElementById("df-location-list");
+  if (!dl) return;
+  var vals = getMasterValues("location");
+  dl.innerHTML = vals.map(function(v){ return '<option value="'+v+'">'; }).join("");
+}
+
+/* ══════════════════════════════
+   REPORTING MANAGER PICKER
+   Typeahead over existing employees
+══════════════════════════════ */
+var _managerPickerExcludeId = null;
+
+function initManagerPicker(excludeId) {
+  _managerPickerExcludeId = excludeId || null;
+  var input = document.getElementById("df-manager");
+  var drop  = document.getElementById("df-manager-drop");
+  if (!input || !drop) return;
+
+  /* Remove old listeners by replacing element clone */
+  var newInput = input.cloneNode(true);
+  input.parentNode.replaceChild(newInput, input);
+  input = newInput;
+
+  input.setAttribute("autocomplete", "off");
+  input.setAttribute("placeholder", "Search employee name...");
+
+  input.addEventListener("input", function() {
+    var q = this.value.trim().toLowerCase();
+    renderManagerDrop(q, drop);
+  });
+  input.addEventListener("focus", function() {
+    var q = this.value.trim().toLowerCase();
+    renderManagerDrop(q, drop);
+  });
+  document.addEventListener("click", function(e) {
+    if (!input.contains(e.target) && !drop.contains(e.target)) {
+      drop.style.display = "none";
+    }
+  });
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") drop.style.display = "none";
+  });
+}
+
+function renderManagerDrop(q, drop) {
+  var emps = getEmployees().filter(function(e) {
+    if (_managerPickerExcludeId && e.id === _managerPickerExcludeId) return false;
+    if (e.status === "Inactive") return false;
+    var name = (e.firstName + " " + e.lastName).toLowerCase();
+    return !q || name.includes(q) || (e.empCode||"").toLowerCase().includes(q);
+  }).slice(0, 8);
+
+  if (!emps.length) {
+    drop.style.display = "none";
+    return;
+  }
+
+  drop.innerHTML = emps.map(function(e) {
+    var av = e.photo
+      ? '<img src="'+e.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />'
+      : (e.firstName[0]+e.lastName[0]);
+    var statusCls = e.status === "Active" ? "status-active" : "status-probation";
+    return '<div class="mgr-drop-item" data-name="'+e.firstName+' '+e.lastName+'" onclick="selectManager(this)">'+
+      '<div class="mgr-drop-avatar">'+av+'</div>'+
+      '<div class="mgr-drop-info">'+
+        '<div class="mgr-drop-name">'+e.firstName+' '+e.lastName+'</div>'+
+        '<div class="mgr-drop-meta">'+(e.empCode||e.id)+' · '+(e.desig||'—')+' · '+(e.dept||'—')+'</div>'+
+      '</div>'+
+      '<span class="status-badge '+statusCls+'">'+e.status+'</span>'+
+    '</div>';
+  }).join("");
+
+  drop.style.display = "block";
+}
+
+function selectManager(el) {
+  var name  = el.dataset.name;
+  var input = document.getElementById("df-manager");
+  var drop  = document.getElementById("df-manager-drop");
+  if (input) input.value = name;
+  if (drop)  drop.style.display = "none";
+}
+
+/* Clear manager field button */
+function clearManagerField() {
+  var input = document.getElementById("df-manager");
+  var drop  = document.getElementById("df-manager-drop");
+  if (input) { input.value = ""; input.focus(); }
+  if (drop)  renderManagerDrop("", drop);
+}
+
 function openAddDrawer() {
   drawerMode = "add";
   drawerStep = 1;
   clearDrawerForm();
+  populateDrawerDropdowns(null);
   const nextId = nextEmpId(getEmployees());
   setVal("df-empCode", nextId);
   setText("drawerTitle", "Add New Employee");
@@ -1419,6 +1584,7 @@ function openEditDrawerById(id) {
   drawerStep       = 1;
   currentProfileId = id;
   setText("drawerTitle", "Edit Employee — " + emp.firstName + " " + emp.lastName);
+  populateDrawerDropdowns(id);
   fillDrawerForm(emp);
   updateDrawerStepUI();
   openDrawer();
