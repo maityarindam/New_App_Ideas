@@ -112,6 +112,7 @@ function initDashboard() {
   initTopbar();
   initWelcomeToggles();
   initWidgetManager();
+  initKPICards();
   initCharts();
   initChartScroll();
   initTasks();
@@ -329,6 +330,7 @@ function initWidgetManager() {
 
   /* Widget (section) toggles */
   const widgetMap = {
+    kpicards:     "kpiCardsWidget",
     tasks:        "tasksWidget",
     quickactions: "quickactionsWidget",
     activities:   "activitiesWidget",
@@ -400,6 +402,64 @@ function initChartScroll() {
   }
   track.addEventListener("scroll", updateArrows, { passive: true });
   updateArrows();
+}
+
+
+/* ══════════════════════════════
+   KPI CARDS — Payroll Cost
+══════════════════════════════ */
+function initKPICards() {
+  const EMP_KEY = "paynest_employees";
+  function getEmps() {
+    try { return JSON.parse(sessionStorage.getItem(EMP_KEY) || "[]"); } catch(e) { return []; }
+  }
+
+  const emps = getEmps();
+  const FY_START = new Date("2025-04-01");
+  const today    = new Date();
+
+  /* Monthly payroll cost — derive from CTC (annual / 12) per employee */
+  /* For the current FY, count months from April 2025 up to today */
+  const fyMonths = Math.min(12, Math.max(1,
+    (today.getFullYear() - FY_START.getFullYear()) * 12
+    + (today.getMonth() - FY_START.getMonth()) + 1
+  ));
+
+  /* Active employees' annual CTC */
+  const activeEmps = emps.filter(e => e.status === "Active" && e.ctc);
+  const totalAnnualCTC = activeEmps.reduce((s, e) => s + parseFloat(e.ctc || 0), 0);
+
+  /* Overall: all employees' annual CTC summed (simplified representation) */
+  const allCTC = emps.filter(e => e.ctc).reduce((s, e) => s + parseFloat(e.ctc || 0), 0);
+
+  /* Current FY payroll cost = (sum of monthly salaries processed so far) */
+  const monthlyAvg    = totalAnnualCTC / 12;
+  const fyPayrollCost = monthlyAvg * fyMonths;
+  const overallCost   = allCTC; /* simplified — treat as cumulative annual */
+  const cpe           = activeEmps.length ? totalAnnualCTC / activeEmps.length : 0;
+
+  /* Format ₹ with Indian numbering */
+  function fmtINR(n) {
+    if (n >= 1e7)      return "₹" + (n / 1e7).toFixed(2) + " Cr";
+    if (n >= 1e5)      return "₹" + (n / 1e5).toFixed(2) + " L";
+    return "₹" + Math.round(n).toLocaleString("en-IN");
+  }
+
+  const fyEl      = document.getElementById("kpiFYValue");
+  const overallEl = document.getElementById("kpiOverallValue");
+  const avgEl     = document.getElementById("kpiAvgValue");
+  const cpeEl     = document.getElementById("kpiCPEValue");
+  const fySubEl   = document.getElementById("kpiFYSub");
+  const fyTrendEl = document.getElementById("kpiFYTrendVal");
+  const avgTrEl   = document.getElementById("kpiAvgTrendVal");
+
+  if (fyEl)      fyEl.textContent      = fmtINR(fyPayrollCost);
+  if (overallEl) overallEl.textContent = fmtINR(overallCost);
+  if (avgEl)     avgEl.textContent     = fmtINR(monthlyAvg);
+  if (cpeEl)     cpeEl.textContent     = fmtINR(cpe);
+  if (fySubEl)   fySubEl.textContent   = "FY 2025-26 · " + fyMonths + " month" + (fyMonths !== 1 ? "s" : "") + " processed";
+  if (fyTrendEl) fyTrendEl.textContent = fyMonths + " of 12 months";
+  if (avgTrEl)   avgTrEl.textContent   = activeEmps.length + " active employees";
 }
 
 
@@ -598,6 +658,83 @@ function initCharts() {
       }
     }
   }));
+
+
+  /* ── Chart 6: Payroll Cost Trend ── */
+  (function() {
+    const EMP_KEY = "paynest_employees";
+    function getEmps() {
+      try { return JSON.parse(sessionStorage.getItem(EMP_KEY) || "[]"); } catch(e) { return []; }
+    }
+    const emps = getEmps();
+    const activeEmps = emps.filter(e => e.status === "Active" && e.ctc);
+    const totalAnnual = activeEmps.reduce((s, e) => s + parseFloat(e.ctc || 0), 0);
+    const baseMonthly = totalAnnual / 12;
+
+    /* Simulate slight monthly variation ±3% around base */
+    const variance  = [0.98, 1.00, 1.02, 0.99, 1.01, 1.03, 1.00, 0.98, 1.02, 1.01, 1.00, 1.03];
+    const costData  = months.map((_, i) => Math.round(baseMonthly * variance[i]));
+    const fyTotal   = costData.reduce((s, v) => s + v, 0);
+
+    function fmtINR(n) {
+      if (n >= 1e7) return "₹" + (n / 1e7).toFixed(2) + " Cr";
+      if (n >= 1e5) return "₹" + (n / 1e5).toFixed(2) + " L";
+      return "₹" + Math.round(n).toLocaleString("en-IN");
+    }
+
+    const totalEl = document.getElementById("payrollCostTotal");
+    const deltaEl = document.getElementById("payrollCostDelta");
+    if (totalEl) totalEl.innerHTML = fmtINR(fyTotal) + ' <span class="cc-delta positive" id="payrollCostDelta">FY Total</span>';
+
+    const ctx6 = $("chartPayrollCost");
+    if (!ctx6) return;
+
+    window._paynestCharts.push(new Chart(ctx6, {
+      type: "bar",
+      data: {
+        labels: months,
+        datasets: [{
+          label: "Payroll Cost",
+          data: costData,
+          backgroundColor: months.map((_, i) =>
+            i % 2 === 0 ? "rgba(124,58,237,.75)" : "rgba(236,72,153,.65)"
+          ),
+          borderRadius: 5,
+          hoverBackgroundColor: "#7C3AED"
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                const v = ctx.parsed.y;
+                if (v >= 1e7) return "₹" + (v/1e7).toFixed(2) + " Cr";
+                if (v >= 1e5) return "₹" + (v/1e5).toFixed(2) + " L";
+                return "₹" + v.toLocaleString("en-IN");
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+          y: {
+            beginAtZero: false,
+            grid: { color: gridColor() },
+            ticks: {
+              font: { size: 9 },
+              callback: function(v) {
+                if (v >= 1e5) return "₹" + (v/1e5).toFixed(0) + "L";
+                return "₹" + (v/1000).toFixed(0) + "K";
+              }
+            }
+          }
+        }
+      }
+    }));
+  })();
 }
 
 
