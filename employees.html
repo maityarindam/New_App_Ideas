@@ -228,7 +228,14 @@
           <div class="ov-customizer-panel" id="ovCustomizerPanel">
             <div class="ov-cust-title">Show / Hide Sections</div>
             <label class="ov-cust-row"><input type="checkbox" checked data-ovsection="ovStatsGrid" /> Stat Cards</label>
-            <label class="ov-cust-row"><input type="checkbox" checked data-ovsection="ovChartsRow" /> Charts</label>
+            <label class="ov-cust-row"><input type="checkbox" checked data-ovsection="ovChartsRow" /> Headcount &amp; Gender Charts</label>
+            <label class="ov-cust-row"><input type="checkbox" checked data-ovsection="ovDeptChartsRow" /> Department Charts</label>
+            <div class="ov-cust-divider"></div>
+            <div class="ov-cust-title">Individual Charts</div>
+            <label class="ov-cust-row"><input type="checkbox" checked data-ovwidget="ovChartHeadcount" /> Headcount Trend</label>
+            <label class="ov-cust-row"><input type="checkbox" checked data-ovwidget="ovChartGender" /> Gender Distribution</label>
+            <label class="ov-cust-row"><input type="checkbox" checked data-ovwidget="ovChartDeptHiring" /> Dept Wise Hiring</label>
+            <label class="ov-cust-row"><input type="checkbox" checked data-ovwidget="ovChartDeptAttrition" /> Dept Wise Attrition</label>
             <div class="ov-cust-divider"></div>
             <div class="ov-cust-title">Widgets</div>
             <label class="ov-cust-row"><input type="checkbox" checked data-ovwidget="ovWidgetBirthdays" /> Upcoming Birthdays</label>
@@ -315,7 +322,7 @@
 
         <!-- CHARTS ROW -->
         <div class="ov-charts-row" id="ovChartsRow">
-          <div class="ov-chart-card ov-chart-wide">
+          <div class="ov-chart-card ov-chart-wide" id="ovChartHeadcount">
             <div class="ov-chart-header">
               <span class="ov-chart-title">Employee Headcount Trend</span>
               <select class="cc-year-select" id="ovTrendYear">
@@ -327,7 +334,7 @@
               <canvas id="ovHeadcountChart"></canvas>
             </div>
           </div>
-          <div class="ov-chart-card ov-chart-narrow">
+          <div class="ov-chart-card ov-chart-narrow" id="ovChartGender">
             <div class="ov-chart-header">
               <span class="ov-chart-title">Gender Distribution</span>
             </div>
@@ -339,6 +346,36 @@
               </div>
             </div>
             <div class="ov-gender-legend" id="ovGenderLegend"></div>
+          </div>
+        </div>
+
+        <!-- DEPT CHARTS ROW -->
+        <div class="ov-charts-row ov-dept-charts-row" id="ovDeptChartsRow">
+          <div class="ov-chart-card" id="ovChartDeptHiring">
+            <div class="ov-chart-header">
+              <span class="ov-chart-title">Department Wise Hiring</span>
+              <select class="cc-year-select" id="ovDeptHiringYear">
+                <option>Current FY</option>
+                <option>Last Year</option>
+                <option>All Time</option>
+              </select>
+            </div>
+            <div style="height:200px;position:relative;">
+              <canvas id="ovDeptHiringChart"></canvas>
+            </div>
+          </div>
+          <div class="ov-chart-card" id="ovChartDeptAttrition">
+            <div class="ov-chart-header">
+              <span class="ov-chart-title">Department Wise Attrition</span>
+              <select class="cc-year-select" id="ovDeptAttritionYear">
+                <option>Current FY</option>
+                <option>Last Year</option>
+                <option>All Time</option>
+              </select>
+            </div>
+            <div style="height:200px;position:relative;">
+              <canvas id="ovDeptAttritionChart"></canvas>
+            </div>
           </div>
         </div>
 
