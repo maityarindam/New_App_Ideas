@@ -113,7 +113,7 @@
           </span>
           <div class="page-dropdown" id="pageDropdown">
             <a class="pd-item active" href="dashboard.html">⊞ Dashboard</a>
-            <a class="pd-item" href="employees.html">👥 Employees</a>
+            <a class="pd-item" href="#">👥 Employees</a>
             <a class="pd-item" href="#">💰 Payroll</a>
             <a class="pd-item" href="#">📅 Attendance</a>
             <a class="pd-item" href="#">🌿 Leave</a>
@@ -129,6 +129,13 @@
       </div>
 
       <div class="topbar-right">
+
+        <!-- Live clock -->
+        <div class="tb-clock" id="tbClock">
+          <div class="tb-clock-time" id="tbClockTime">00:00:00</div>
+          <div class="tb-clock-date" id="tbClockDate">Mon, 01 Jan 2026</div>
+        </div>
+
         <button class="tb-icon-btn notif-btn" id="notifBtn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <span class="notif-badge">3</span>
@@ -279,6 +286,7 @@
             <label class="wm-row"><input type="checkbox" checked data-widget="tasks" /> My Tasks</label>
             <label class="wm-row"><input type="checkbox" checked data-widget="quickactions" /> Quick Actions</label>
             <label class="wm-row"><input type="checkbox" checked data-widget="activities" /> Recent Activities</label>
+            <label class="wm-row"><input type="checkbox" checked data-widget="holidays" /> Upcoming Holidays</label>
             <div class="wm-divider"></div>
             <div class="wm-title">Charts</div>
             <label class="wm-row"><input type="checkbox" checked data-chart="chartEmpAdd" /> Employee Addition</label>
@@ -389,6 +397,24 @@
           </section>
         </div>
       </div>
+
+      <!-- ── HOLIDAYS SECTION ── -->
+      <section class="holidays-section" id="holidaysWidget">
+        <div class="hol-header">
+          <div class="hol-header-left">
+            <span class="hol-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>
+              Upcoming Holidays
+            </span>
+            <span class="hol-year-badge" id="holYearBadge">FY 2025-26</span>
+          </div>
+          <button class="hol-view-all-btn" id="holViewAllBtn" onclick="openHolidayModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            View Full Calendar
+          </button>
+        </div>
+        <div class="hol-cards-track" id="holCardsTrack"></div>
+      </section>
 
       <!-- ── BOTTOM ROW ── -->
       <section class="bottom-row">
@@ -511,6 +537,42 @@
   </div><!-- /main-wrap -->
 
 </div><!-- /app -->
+
+<!-- ══════════════════════════════
+     HOLIDAY CALENDAR MODAL
+══════════════════════════════ -->
+<div class="hol-modal-overlay" id="holModalOverlay" onclick="closeHolidayModal()" style="display:none;">
+  <div class="hol-modal" onclick="event.stopPropagation()">
+    <div class="hol-modal-header">
+      <div class="hol-modal-title-row">
+        <div class="hol-modal-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <div>
+          <div class="hol-modal-title">Holiday Calendar</div>
+          <div class="hol-modal-sub">Financial Year 2025–26 · India</div>
+        </div>
+      </div>
+      <button class="hol-modal-close" onclick="closeHolidayModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="hol-modal-stats" id="holModalStats"></div>
+    <div class="hol-modal-filter-row">
+      <button class="hol-filter-btn active" data-filter="all" onclick="filterHolidays(this)">All Holidays</button>
+      <button class="hol-filter-btn" data-filter="national" onclick="filterHolidays(this)">National</button>
+      <button class="hol-filter-btn" data-filter="regional" onclick="filterHolidays(this)">Regional</button>
+      <button class="hol-filter-btn" data-filter="optional" onclick="filterHolidays(this)">Optional</button>
+    </div>
+    <div class="hol-modal-body" id="holModalBody"></div>
+    <div class="hol-modal-footer">
+      <span class="hol-modal-note">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Holidays are subject to change based on company policy. Regional holidays may vary.
+      </span>
+    </div>
+  </div>
+</div>
 
 <script src="app.js"></script>
 </body>
