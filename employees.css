@@ -936,6 +936,13 @@ body.dark-mode .modal-box h3 { color: #F3F4F6; }
 .prof-search-name { font-size: 13px; font-weight: 600; color: var(--text); }
 .prof-search-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
 
+/* Dept charts row — full width two-column */
+.ov-dept-charts-row {
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 14px;
+}
+@media (max-width: 900px) { .ov-dept-charts-row { grid-template-columns: 1fr; } }
+
 /* ══════════════════════════════
    OVERVIEW CUSTOMIZER BAR
 ══════════════════════════════ */
