@@ -68,6 +68,12 @@
         </span>
         <span class="sb-label">Reports</span>
       </a>
+      <a class="sb-item" href="masters.html" data-label="Masters">
+        <span class="sb-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </span>
+        <span class="sb-label">Masters</span>
+      </a>
       <a class="sb-item" href="#" data-label="Settings">
         <span class="sb-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2m0 18v-2m7.07-3.93l-1.41-1.41M4.93 19.07l1.41-1.41M2 12h2m18 0h-2"/></svg>
@@ -111,6 +117,7 @@
             <a class="pd-item" href="#">📅 Attendance</a>
             <a class="pd-item" href="#">🌿 Leave</a>
             <a class="pd-item" href="#">📊 Reports</a>
+            <a class="pd-item" href="masters.html">⚙️ Masters</a>
           </div>
         </div>
       </div>
@@ -686,9 +693,6 @@
             <label>Gender <span class="req">*</span></label>
             <select id="df-gender">
               <option value="">Select gender</option>
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
             </select>
           </div>
           <div class="dform-group">
@@ -699,20 +703,12 @@
             <label>Marital Status</label>
             <select id="df-marital">
               <option value="">Select</option>
-              <option>Single</option>
-              <option>Married</option>
-              <option>Divorced</option>
-              <option>Widowed</option>
             </select>
           </div>
           <div class="dform-group">
             <label>Blood Group</label>
             <select id="df-blood">
               <option value="">Select</option>
-              <option>A+</option><option>A-</option>
-              <option>B+</option><option>B-</option>
-              <option>O+</option><option>O-</option>
-              <option>AB+</option><option>AB-</option>
             </select>
           </div>
         </div>
@@ -753,14 +749,12 @@
             <label>Department <span class="req">*</span></label>
             <select id="df-dept">
               <option value="">Select department</option>
-              <option>Payroll</option><option>HR</option><option>Finance</option>
-              <option>IT</option><option>Operations</option><option>Sales</option>
-              <option>Marketing</option><option>Admin</option>
             </select>
           </div>
           <div class="dform-group">
             <label>Designation <span class="req">*</span></label>
-            <input type="text" id="df-desig" placeholder="e.g. Software Engineer" />
+            <input type="text" id="df-desig" placeholder="e.g. Software Engineer" list="df-desig-list" autocomplete="off" />
+            <datalist id="df-desig-list"></datalist>
           </div>
           <div class="dform-group">
             <label>Date of Joining <span class="req">*</span></label>
@@ -770,27 +764,29 @@
             <label>Employment Type</label>
             <select id="df-empType">
               <option value="">Select type</option>
-              <option>Full-Time</option>
-              <option>Part-Time</option>
-              <option>Contract</option>
-              <option>Intern</option>
             </select>
           </div>
           <div class="dform-group">
             <label>Status</label>
             <select id="df-status">
               <option value="Active">Active</option>
-              <option value="On Probation">On Probation</option>
-              <option value="Inactive">Inactive</option>
             </select>
           </div>
           <div class="dform-group">
             <label>Location</label>
-            <input type="text" id="df-location" placeholder="e.g. Kolkata" />
+            <input type="text" id="df-location" placeholder="e.g. Kolkata" list="df-location-list" autocomplete="off" />
+            <datalist id="df-location-list"></datalist>
           </div>
-          <div class="dform-group">
+          <div class="dform-group full">
             <label>Reporting Manager</label>
-            <input type="text" id="df-manager" placeholder="Manager name" />
+            <div class="mgr-picker-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted);flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="df-manager" placeholder="Search employee name..." autocomplete="off" />
+              <button type="button" class="mgr-clear-btn" onclick="clearManagerField()" title="Clear">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="mgr-drop" id="df-manager-drop" style="display:none;"></div>
           </div>
           <div class="dform-group">
             <label>CTC (Annual ₹)</label>
