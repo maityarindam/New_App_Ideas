@@ -117,6 +117,39 @@ function initDashboard() {
   initTasks();
   initPhotoUpload();
   initGlobalSearch();
+  initHolidays();
+  initClock();
+}
+
+
+/* ══════════════════════════════
+   LIVE CLOCK
+══════════════════════════════ */
+function initClock() {
+  const timeEl = document.getElementById("tbClockTime");
+  const dateEl = document.getElementById("tbClockDate");
+  if (!timeEl || !dateEl) return;
+
+  const DAY_NAMES  = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const MON_NAMES  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  function tick() {
+    const now  = new Date();
+    const hh   = String(now.getHours()).padStart(2, "0");
+    const mm   = String(now.getMinutes()).padStart(2, "0");
+    const ss   = String(now.getSeconds()).padStart(2, "0");
+    /* Seconds in primary colour via a span */
+    timeEl.innerHTML = hh + ":" + mm + ":<span class='tb-clock-seconds'>" + ss + "</span>";
+
+    const day  = DAY_NAMES[now.getDay()];
+    const date = String(now.getDate()).padStart(2, "0");
+    const mon  = MON_NAMES[now.getMonth()];
+    const yr   = now.getFullYear();
+    dateEl.textContent = day + ", " + date + " " + mon + " " + yr;
+  }
+
+  tick();
+  setInterval(tick, 1000);
 }
 
 
@@ -298,7 +331,8 @@ function initWidgetManager() {
   const widgetMap = {
     tasks:        "tasksWidget",
     quickactions: "quickactionsWidget",
-    activities:   "activitiesWidget"
+    activities:   "activitiesWidget",
+    holidays:     "holidaysWidget"
   };
   wm.querySelectorAll("input[data-widget]").forEach(function (cb) {
     cb.addEventListener("change", function () {
@@ -307,13 +341,36 @@ function initWidgetManager() {
     });
   });
 
-  /* Individual chart toggles */
+  /* Individual chart toggles — update serial numbers after change */
   wm.querySelectorAll("input[data-chart]").forEach(function (cb) {
     cb.addEventListener("change", function () {
       const cardId = "chartCard-" + this.dataset.chart;
       const card   = $(cardId);
       if (card) card.style.display = this.checked ? "" : "none";
+      updateChartSerialNumbers();
     });
+  });
+}
+
+/* ══════════════════════════════
+   CHART SERIAL NUMBERS — dynamic
+══════════════════════════════ */
+function updateChartSerialNumbers() {
+  /* Chart cards in DOM order, only visible ones get sequential numbers */
+  const allCards = document.querySelectorAll(".chart-card[id^='chartCard-']");
+  let serial = 1;
+  allCards.forEach(function (card) {
+    const titleEl = card.querySelector(".cc-title");
+    if (!titleEl) return;
+    /* Strip existing serial prefix like "1. " or "2. " */
+    const rawTitle = titleEl.textContent.replace(/^\d+\.\s*/, "");
+    if (card.style.display === "none") {
+      /* Hidden — keep raw title (no serial) so it looks right if re-shown */
+      titleEl.textContent = rawTitle;
+    } else {
+      titleEl.textContent = serial + ". " + rawTitle;
+      serial++;
+    }
   });
 }
 
@@ -740,4 +797,216 @@ function initPhotoUpload() {
     };
     reader.readAsDataURL(file);
   });
+}
+
+
+/* ══════════════════════════════
+   HOLIDAYS  (FY 2025-26, India)
+══════════════════════════════ */
+const HOLIDAYS = [
+  // National
+  { date:"2025-08-15", name:"Independence Day",         type:"national",  desc:"India's 79th Independence Day" },
+  { date:"2025-10-02", name:"Gandhi Jayanti",            type:"national",  desc:"Birth anniversary of Mahatma Gandhi" },
+  { date:"2026-01-26", name:"Republic Day",              type:"national",  desc:"India's 77th Republic Day" },
+  // Regional / gazetted
+  { date:"2025-04-14", name:"Dr. Ambedkar Jayanti",     type:"regional",  desc:"Birth anniversary of B. R. Ambedkar" },
+  { date:"2025-04-18", name:"Good Friday",               type:"regional",  desc:"Christian observance" },
+  { date:"2025-05-12", name:"Buddha Purnima",            type:"regional",  desc:"Birth of Gautama Buddha" },
+  { date:"2025-06-07", name:"Eid ul-Adha",               type:"regional",  desc:"Feast of Sacrifice" },
+  { date:"2025-07-06", name:"Muharram",                  type:"regional",  desc:"Islamic New Year" },
+  { date:"2025-08-27", name:"Janmashtami",               type:"regional",  desc:"Birth of Lord Krishna" },
+  { date:"2025-10-02", name:"Mahatma Gandhi Jayanti",    type:"national",  desc:"National holiday" },
+  { date:"2025-10-20", name:"Dussehra",                  type:"regional",  desc:"Victory of Lord Rama over Ravana" },
+  { date:"2025-11-01", name:"Diwali",                    type:"regional",  desc:"Festival of Lights" },
+  { date:"2025-11-05", name:"Bhai Dooj",                 type:"regional",  desc:"Sibling bond celebration" },
+  { date:"2025-11-15", name:"Guru Nanak Jayanti",        type:"regional",  desc:"Birth anniversary of Guru Nanak Dev Ji" },
+  { date:"2025-12-25", name:"Christmas Day",             type:"national",  desc:"Birth of Jesus Christ" },
+  { date:"2026-01-14", name:"Makar Sankranti",           type:"regional",  desc:"Harvest festival" },
+  { date:"2026-02-26", name:"Maha Shivratri",            type:"regional",  desc:"Festival of Lord Shiva" },
+  { date:"2026-03-02", name:"Holi",                      type:"regional",  desc:"Festival of Colors" },
+  { date:"2026-03-20", name:"Eid ul-Fitr",               type:"regional",  desc:"End of Ramadan" },
+  { date:"2026-03-30", name:"Ram Navami",                type:"regional",  desc:"Birth of Lord Rama" },
+  // Optional
+  { date:"2025-04-11", name:"Id-ul-Fitr (Optional)",    type:"optional",  desc:"Optional holiday" },
+  { date:"2025-09-05", name:"Onam (Optional)",           type:"optional",  desc:"Kerala harvest festival" },
+  { date:"2025-10-31", name:"Sardar Patel Jayanti",      type:"optional",  desc:"Birth anniversary of Sardar Patel" },
+  { date:"2026-01-01", name:"New Year's Day (Optional)", type:"optional",  desc:"Optional holiday" },
+];
+
+const HOL_TYPE_CONFIG = {
+  national: { color:"#7C3AED", bg:"rgba(124,58,237,.1)", label:"National" },
+  regional: { color:"#10B981", bg:"rgba(16,185,129,.1)", label:"Regional" },
+  optional: { color:"#F59E0B", bg:"rgba(245,158,11,.1)",  label:"Optional" },
+};
+
+const HOL_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const HOL_DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function parseHolDate(iso) { return new Date(iso + "T00:00:00"); }
+
+function formatHolDate(iso) {
+  const d = parseHolDate(iso);
+  return HOL_DAYS[d.getDay()] + ", " + HOL_MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+}
+
+function daysUntil(iso) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = parseHolDate(iso);
+  return Math.round((d - today) / 86400000);
+}
+
+function initHolidays() {
+  renderHolidayCards();
+}
+
+function renderHolidayCards() {
+  const track = $("holCardsTrack");
+  if (!track) return;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  /* Sort and pick upcoming (≥ today), limit to next 6 */
+  const upcoming = HOLIDAYS
+    .map(h => ({ ...h, diff: daysUntil(h.date) }))
+    .filter(h => h.diff >= 0)
+    .sort((a,b) => a.diff - b.diff)
+    .slice(0, 6);
+
+  if (!upcoming.length) {
+    track.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px 0;">No upcoming holidays in this financial year.</div>';
+    return;
+  }
+
+  track.innerHTML = upcoming.map(function (h) {
+    const cfg = HOL_TYPE_CONFIG[h.type];
+    const d   = parseHolDate(h.date);
+    const diffLabel = h.diff === 0 ? "Today! 🎉" : h.diff === 1 ? "Tomorrow" : h.diff + " days away";
+    const isToday   = h.diff === 0;
+    const isSoon    = h.diff <= 7;
+
+    return `<div class="hol-card ${isToday ? "hol-card-today" : ""}">
+      <div class="hol-card-date-col">
+        <div class="hol-card-month">${HOL_MONTHS[d.getMonth()]}</div>
+        <div class="hol-card-day">${d.getDate()}</div>
+        <div class="hol-card-dow">${HOL_DAYS[d.getDay()]}</div>
+      </div>
+      <div class="hol-card-info">
+        <div class="hol-card-name">${h.name}</div>
+        <div class="hol-card-desc">${h.desc}</div>
+        <div class="hol-card-meta">
+          <span class="hol-type-badge" style="background:${cfg.bg};color:${cfg.color};">${cfg.label}</span>
+          <span class="hol-diff ${isToday ? "hol-diff-today" : isSoon ? "hol-diff-soon" : ""}">${diffLabel}</span>
+        </div>
+      </div>
+      ${isToday ? '<div class="hol-card-pulse"></div>' : ""}
+    </div>`;
+  }).join("");
+}
+
+/* Modal */
+let _holFilter = "all";
+
+function openHolidayModal() {
+  const overlay = $("holModalOverlay");
+  if (!overlay) return;
+  _holFilter = "all";
+  /* Reset filter buttons */
+  document.querySelectorAll(".hol-filter-btn").forEach(function (b) {
+    b.classList.toggle("active", b.dataset.filter === "all");
+  });
+  renderHolModalStats();
+  renderHolModalBody();
+  overlay.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeHolidayModal() {
+  const overlay = $("holModalOverlay");
+  if (overlay) overlay.style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function filterHolidays(btn) {
+  _holFilter = btn.dataset.filter;
+  document.querySelectorAll(".hol-filter-btn").forEach(function (b) {
+    b.classList.toggle("active", b === btn);
+  });
+  renderHolModalBody();
+}
+
+function renderHolModalStats() {
+  const el = $("holModalStats");
+  if (!el) return;
+  const total    = HOLIDAYS.length;
+  const national = HOLIDAYS.filter(h => h.type === "national").length;
+  const regional = HOLIDAYS.filter(h => h.type === "regional").length;
+  const optional = HOLIDAYS.filter(h => h.type === "optional").length;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = HOLIDAYS.filter(h => daysUntil(h.date) >= 0).length;
+
+  el.innerHTML = [
+    { label:"Total", val:total, color:"#7C3AED" },
+    { label:"National", val:national, color:"#7C3AED" },
+    { label:"Regional", val:regional, color:"#10B981" },
+    { label:"Optional", val:optional, color:"#F59E0B" },
+    { label:"Upcoming", val:upcoming, color:"#06B6D4" },
+  ].map(s => `<div class="hol-stat"><div class="hol-stat-num" style="color:${s.color}">${s.val}</div><div class="hol-stat-lbl">${s.label}</div></div>`).join("");
+}
+
+function renderHolModalBody() {
+  const el = $("holModalBody");
+  if (!el) return;
+
+  const filtered = _holFilter === "all"
+    ? HOLIDAYS
+    : HOLIDAYS.filter(h => h.type === _holFilter);
+
+  /* Group by month */
+  const byMonth = {};
+  filtered.forEach(function (h) {
+    const d     = parseHolDate(h.date);
+    const key   = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+    const label = HOL_MONTHS[d.getMonth()] + " " + d.getFullYear();
+    if (!byMonth[key]) byMonth[key] = { label, items: [] };
+    byMonth[key].items.push(h);
+  });
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sortedKeys = Object.keys(byMonth).sort();
+
+  if (!sortedKeys.length) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);font-size:13px;">No holidays in this category.</div>';
+    return;
+  }
+
+  el.innerHTML = sortedKeys.map(function (key) {
+    const group = byMonth[key];
+    const rows  = group.items.map(function (h) {
+      const cfg  = HOL_TYPE_CONFIG[h.type];
+      const diff = daysUntil(h.date);
+      const d    = parseHolDate(h.date);
+      const isPast   = diff < 0;
+      const isToday  = diff === 0;
+
+      return `<div class="hol-modal-row ${isPast ? "hol-row-past" : ""} ${isToday ? "hol-row-today" : ""}">
+        <div class="hol-modal-row-date">
+          <span class="hol-modal-date-num">${d.getDate()}</span>
+          <span class="hol-modal-date-dow">${HOL_DAYS[d.getDay()]}</span>
+        </div>
+        <div class="hol-modal-row-info">
+          <div class="hol-modal-row-name">${h.name}</div>
+          <div class="hol-modal-row-desc">${h.desc}</div>
+        </div>
+        <div class="hol-modal-row-right">
+          <span class="hol-type-badge" style="background:${cfg.bg};color:${cfg.color};">${cfg.label}</span>
+          ${isToday ? '<span class="hol-today-tag">Today</span>' : ""}
+          ${isPast ? '<span class="hol-past-tag">Passed</span>' : ""}
+        </div>
+      </div>`;
+    }).join("");
+
+    return `<div class="hol-modal-month-group">
+      <div class="hol-modal-month-header">${group.label}</div>
+      ${rows}
+    </div>`;
+  }).join("");
 }
