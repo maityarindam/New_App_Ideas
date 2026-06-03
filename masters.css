@@ -3,13 +3,44 @@
 ============================================= */
 
 /* ══════════════════════════════
+   BACK BREADCRUMB
+══════════════════════════════ */
+.masters-back-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.masters-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.masters-back-btn:hover { opacity: .75; }
+.masters-back-sep {
+  color: var(--muted);
+  font-size: 14px;
+}
+.masters-back-current {
+  color: var(--text);
+  font-weight: 600;
+}
+
+body.dark-mode .masters-back-current { color: #D1D5DB; }
+
+/* ══════════════════════════════
    LAYOUT
 ══════════════════════════════ */
 .masters-layout {
   display: grid;
   grid-template-columns: 240px 1fr;
   gap: 16px;
-  height: calc(100vh - var(--topbar-h) - var(--footer-h) - 32px);
+  height: calc(100vh - var(--topbar-h) - var(--footer-h) - 32px - 40px);
 }
 
 .masters-sidebar {
