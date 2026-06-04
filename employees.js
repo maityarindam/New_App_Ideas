@@ -1259,7 +1259,9 @@ function selectProfSearch(id) {
 }
 
 /* ══════════════════════════════
-   ORG TREE  — fixed layout + arrowheads
+   ORG TREE  — SVG connector approach
+   Connectors are drawn AFTER layout via SVG overlays,
+   so they never collide with the cards.
 ══════════════════════════════ */
 function renderOrgTree() {
   var wrap = document.getElementById("orgTreeWrap");
@@ -1275,9 +1277,9 @@ function renderOrgTree() {
   ];
   function lc(depth) { return levelColors[Math.min(depth, levelColors.length - 1)]; }
 
-  var LINE_COLOR  = "#A78BFA";
-  var VERT_GAP    = 56;
-  var ARROW_ID    = "org-arrow-" + Date.now(); /* unique per render */
+  var LINE_COLOR = "#CBD5E1";
+  var VERT_GAP   = 48;   /* vertical space between card bottom and children top — enough for the line */
+  var COL_PAD    = 28;   /* horizontal padding around each child column */
 
   var allNames = emps.map(function (e) {
     return (e.firstName + " " + e.lastName).toLowerCase();
@@ -1287,7 +1289,7 @@ function renderOrgTree() {
     return !e.manager || !e.manager.trim() || !allNames.includes(e.manager.toLowerCase());
   });
 
-  /* Build card inner HTML */
+  /* Build a card's inner HTML */
   function cardInner(emp, depth) {
     var c  = lc(depth);
     var av = emp.photo
@@ -1301,134 +1303,122 @@ function renderOrgTree() {
       '</div>';
   }
 
-  /* Recursively build DOM — each node is a flex-column block */
+  /* Recursively build DOM node; returns the .org-node-wrap element */
   function buildNode(emp, depth) {
     var reports = emps.filter(function (e) {
       return e.manager && e.manager.toLowerCase() === (emp.firstName + ' ' + emp.lastName).toLowerCase();
     });
 
-    var nodeWrap = document.createElement("div");
-    nodeWrap.className = "org-node-wrap" + (depth === 0 ? " org-root" : "");
-    nodeWrap.style.cssText = "display:inline-flex;flex-direction:column;align-items:center;";
+    /* Wrapper */
+    var wrap = document.createElement("div");
+    wrap.className = "org-node-wrap" + (depth === 0 ? " org-root" : "");
 
     /* Card */
     var card = document.createElement("div");
     card.className = "org-node-card";
     card.innerHTML = cardInner(emp, depth);
     card.addEventListener("click", function () { viewProfile(emp.id); });
-    nodeWrap.appendChild(card);
+    wrap.appendChild(card);
 
-    if (reports.length === 0) return nodeWrap;
+    if (reports.length === 0) return wrap;
 
-    /* SVG connector between card and children */
-    var svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgEl.classList.add("org-connector-svg");
-    svgEl.setAttribute("height", String(VERT_GAP));
-    svgEl.style.cssText = "width:100%;display:block;flex-shrink:0;overflow:visible;";
-    nodeWrap.appendChild(svgEl);
+    /* ── SVG connector: vertical stem down from this card ── */
+    /* We'll draw it as an inline SVG that sits BETWEEN the card and the children row.
+       Height = VERT_GAP, width = full children row width (set after layout via JS post-pass). */
 
-    /* Children row — always horizontal flex */
+    /* Children row */
     var childRow = document.createElement("div");
     childRow.className = "org-children-row";
-    childRow.style.cssText = "display:flex;flex-direction:row;align-items:flex-start;flex-wrap:nowrap;";
 
-    var childCols = reports.map(function (child) {
+    var childNodes = reports.map(function (child) {
       var col = document.createElement("div");
       col.className = "org-child-col";
-      col.style.cssText = "display:flex;flex-direction:column;align-items:center;padding:0 20px;";
       col.appendChild(buildNode(child, depth + 1));
       return col;
     });
-    childCols.forEach(function (col) { childRow.appendChild(col); });
-    nodeWrap.appendChild(childRow);
+    childNodes.forEach(function (col) { childRow.appendChild(col); });
 
-    /* Draw connectors after layout */
+    /* SVG placeholder — we size & draw it after DOM insertion */
+    var svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgEl.classList.add("org-connector-svg");
+    svgEl.setAttribute("height", String(VERT_GAP));
+    svgEl.style.width = "100%";
+
+    wrap.appendChild(svgEl);
+    wrap.appendChild(childRow);
+
+    /* Schedule connector drawing after browser has laid out the DOM */
     requestAnimationFrame(function () {
-      drawConnectors(svgEl, card, childCols, VERT_GAP, LINE_COLOR, ARROW_ID);
+      drawConnectors(svgEl, card, childNodes, childRow, VERT_GAP, LINE_COLOR);
     });
 
-    return nodeWrap;
+    return wrap;
   }
 
-  /* Draw SVG lines with arrowheads */
-  function drawConnectors(svgEl, parentCard, childCols, vertGap, color, arrowId) {
+  /* Draw the connector lines for one parent→children group */
+  function drawConnectors(svgEl, parentCard, childCols, childRow, vertGap, color) {
+    /* Measure everything relative to the SVG element */
     var svgRect    = svgEl.getBoundingClientRect();
     var parentRect = parentCard.getBoundingClientRect();
 
-    if (svgRect.width === 0) return;
+    if (svgRect.width === 0) return; /* not yet visible */
 
-    /* Clear */
-    while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
-
-    /* Define arrowhead marker */
-    var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-    var marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-    marker.setAttribute("id", arrowId);
-    marker.setAttribute("markerWidth", "8");
-    marker.setAttribute("markerHeight", "8");
-    marker.setAttribute("refX", "4");
-    marker.setAttribute("refY", "4");
-    marker.setAttribute("orient", "auto");
-    var arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    arrowPath.setAttribute("d", "M0,1 L0,7 L6,4 Z");
-    arrowPath.setAttribute("fill", color);
-    marker.appendChild(arrowPath);
-    defs.appendChild(marker);
-    svgEl.appendChild(defs);
-
-    var markerUrl = "url(#" + arrowId + ")";
-    var strokeW   = "1.8";
-
+    /* Parent mid-x relative to SVG */
     var parentMid = parentRect.left + parentRect.width / 2 - svgRect.left;
-    var stemY     = vertGap / 2;
 
+    /* Vertical stem: from top of SVG (= bottom of card) down to mid-point */
+    var stemY = vertGap / 2;
+
+    /* Collect children mid-x positions */
     var childMids = childCols.map(function (col) {
       var r = col.getBoundingClientRect();
-      /* find the card inside the col for more accurate mid-x */
-      var cardEl = col.querySelector(".org-node-card");
-      if (cardEl) {
-        var cr = cardEl.getBoundingClientRect();
-        return cr.left + cr.width / 2 - svgRect.left;
-      }
       return r.left + r.width / 2 - svgRect.left;
     });
 
-    function makeLine(x1, y1, x2, y2, withArrow) {
-      var ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      ln.setAttribute("x1", x1); ln.setAttribute("y1", y1);
-      ln.setAttribute("x2", x2); ln.setAttribute("y2", y2);
-      ln.setAttribute("stroke", color);
-      ln.setAttribute("stroke-width", strokeW);
-      ln.setAttribute("stroke-linecap", "round");
-      if (withArrow) ln.setAttribute("marker-end", markerUrl);
-      svgEl.appendChild(ln);
-    }
+    var strokeW = "2";
 
-    /* Vertical stem down from parent card centre */
-    makeLine(parentMid, 0, parentMid, stemY, false);
+    /* Clear any previous drawing */
+    while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+
+    /* Vertical stem down from parent mid */
+    var vStem = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    vStem.setAttribute("x1", parentMid); vStem.setAttribute("y1", 0);
+    vStem.setAttribute("x2", parentMid); vStem.setAttribute("y2", stemY);
+    vStem.setAttribute("stroke", color); vStem.setAttribute("stroke-width", strokeW);
+    svgEl.appendChild(vStem);
 
     if (childMids.length === 1) {
-      /* Single child — straight line with arrow */
-      makeLine(childMids[0], stemY, childMids[0], vertGap, true);
+      /* Single child — just extend the vertical line */
+      var ext = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      ext.setAttribute("x1", childMids[0]); ext.setAttribute("y1", stemY);
+      ext.setAttribute("x2", childMids[0]); ext.setAttribute("y2", vertGap);
+      ext.setAttribute("stroke", color); ext.setAttribute("stroke-width", strokeW);
+      svgEl.appendChild(ext);
     } else {
-      /* Horizontal crossbar */
+      /* Horizontal bar across children */
       var leftX  = Math.min.apply(null, childMids);
       var rightX = Math.max.apply(null, childMids);
-      makeLine(leftX, stemY, rightX, stemY, false);
 
-      /* Drop with arrow to each child */
+      var hBar = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      hBar.setAttribute("x1", leftX);  hBar.setAttribute("y1", stemY);
+      hBar.setAttribute("x2", rightX); hBar.setAttribute("y2", stemY);
+      hBar.setAttribute("stroke", color); hBar.setAttribute("stroke-width", strokeW);
+      svgEl.appendChild(hBar);
+
+      /* Vertical drops to each child */
       childMids.forEach(function (mx) {
-        makeLine(mx, stemY, mx, vertGap, true);
+        var vDrop = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        vDrop.setAttribute("x1", mx); vDrop.setAttribute("y1", stemY);
+        vDrop.setAttribute("x2", mx); vDrop.setAttribute("y2", vertGap);
+        vDrop.setAttribute("stroke", color); vDrop.setAttribute("stroke-width", strokeW);
+        svgEl.appendChild(vDrop);
       });
     }
   }
 
-  /* Assemble tree */
+  /* Build tree and insert */
   var container = document.createElement("div");
   container.className = "org-tree-root";
-  /* Always row layout at root level so multiple roots sit side by side */
-  container.style.cssText = "display:inline-flex;flex-direction:row;align-items:flex-start;gap:40px;padding:32px 60px 60px;min-width:max-content;";
-
   roots.forEach(function (r) { container.appendChild(buildNode(r, 0)); });
 
   wrap.innerHTML = "";
@@ -1436,7 +1426,7 @@ function renderOrgTree() {
   wrap.style.padding  = "12px 0";
   wrap.appendChild(container);
 
-  /* Redraw on resize */
+  /* Re-draw connectors on window resize */
   var resizeTimer;
   window.addEventListener("resize", function () {
     clearTimeout(resizeTimer);
@@ -1477,7 +1467,10 @@ function populateDesigDatalist() {
 }
 
 function populateLocationDatalist() {
-  populateMasterSelect("df-location", "location", "Select location");
+  var dl = document.getElementById("df-location-list");
+  if (!dl) return;
+  var vals = getMasterValues("location");
+  dl.innerHTML = vals.map(function(v){ return '<option value="'+v+'">'; }).join("");
 }
 
 /* ══════════════════════════════
