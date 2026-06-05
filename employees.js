@@ -1259,15 +1259,19 @@ function selectProfSearch(id) {
 }
 
 /* ══════════════════════════════
-   ORG TREE  — SVG connector approach
-   Connectors are drawn AFTER layout via SVG overlays,
-   so they never collide with the cards.
+   ORG TREE  — SVG connector approach with arrowheads
+   Connectors drawn after layout; arrowheads point down
+   toward each child card. Multiple roots shown side-by-side.
 ══════════════════════════════ */
 function renderOrgTree() {
   var wrap = document.getElementById("orgTreeWrap");
   if (!wrap) return;
 
   var emps = getEmployees();
+  if (!emps.length) {
+    wrap.innerHTML = '<div style="padding:60px;text-align:center;color:var(--muted);font-size:14px;">No employees to display.</div>';
+    return;
+  }
 
   var levelColors = [
     { avatar:"#7C3AED", desig:"#7C3AED", badge:"rgba(124,58,237,.1)", badgeText:"#7C3AED" },
@@ -1277,19 +1281,22 @@ function renderOrgTree() {
   ];
   function lc(depth) { return levelColors[Math.min(depth, levelColors.length - 1)]; }
 
-  var LINE_COLOR = "#CBD5E1";
-  var VERT_GAP   = 48;   /* vertical space between card bottom and children top — enough for the line */
-  var COL_PAD    = 28;   /* horizontal padding around each child column */
+  var isDark     = document.body.classList.contains("dark-mode");
+  var LINE_COLOR = isDark ? "#4B5563" : "#CBD5E1";
+  var ARROW_COLOR= isDark ? "#6B7280" : "#94A3B8";
+  var VERT_GAP   = 56;  /* space between card bottom and children top */
+  var ARROW_SIZE = 7;   /* arrowhead size in px */
 
   var allNames = emps.map(function (e) {
     return (e.firstName + " " + e.lastName).toLowerCase();
   });
 
+  /* Find root employees (no manager, or manager not found in list) */
   var roots = emps.filter(function (e) {
     return !e.manager || !e.manager.trim() || !allNames.includes(e.manager.toLowerCase());
   });
 
-  /* Build a card's inner HTML */
+  /* Build card inner HTML */
   function cardInner(emp, depth) {
     var c  = lc(depth);
     var av = emp.photo
@@ -1303,135 +1310,145 @@ function renderOrgTree() {
       '</div>';
   }
 
-  /* Recursively build DOM node; returns the .org-node-wrap element */
+  /* SVG helper: draw a line */
+  function svgLine(svg, x1, y1, x2, y2, color, w) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    el.setAttribute("x1", x1); el.setAttribute("y1", y1);
+    el.setAttribute("x2", x2); el.setAttribute("y2", y2);
+    el.setAttribute("stroke", color);
+    el.setAttribute("stroke-width", w || "2");
+    el.setAttribute("stroke-linecap", "round");
+    svg.appendChild(el);
+  }
+
+  /* SVG helper: draw downward filled arrowhead at (cx, cy) */
+  function svgArrow(svg, cx, cy, color) {
+    var s = ARROW_SIZE;
+    var pts = (cx - s) + "," + (cy - s) + " " + cx + "," + cy + " " + (cx + s) + "," + (cy - s);
+    var el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    el.setAttribute("points", pts);
+    el.setAttribute("fill", color);
+    el.setAttribute("stroke", "none");
+    svg.appendChild(el);
+  }
+
+  /* Recursively build a node DOM element */
   function buildNode(emp, depth) {
     var reports = emps.filter(function (e) {
       return e.manager && e.manager.toLowerCase() === (emp.firstName + ' ' + emp.lastName).toLowerCase();
     });
 
-    /* Wrapper */
-    var wrap = document.createElement("div");
-    wrap.className = "org-node-wrap" + (depth === 0 ? " org-root" : "");
+    var nodeWrap = document.createElement("div");
+    nodeWrap.className = "org-node-wrap" + (depth === 0 ? " org-root" : "");
 
-    /* Card */
     var card = document.createElement("div");
     card.className = "org-node-card";
     card.innerHTML = cardInner(emp, depth);
     card.addEventListener("click", function () { viewProfile(emp.id); });
-    wrap.appendChild(card);
+    nodeWrap.appendChild(card);
 
-    if (reports.length === 0) return wrap;
+    if (!reports.length) return nodeWrap;
 
-    /* ── SVG connector: vertical stem down from this card ── */
-    /* We'll draw it as an inline SVG that sits BETWEEN the card and the children row.
-       Height = VERT_GAP, width = full children row width (set after layout via JS post-pass). */
+    /* SVG connector gap */
+    var svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgEl.classList.add("org-connector-svg");
+    svgEl.setAttribute("height", String(VERT_GAP));
+    svgEl.setAttribute("overflow", "visible");
+    svgEl.style.cssText = "width:100%;display:block;flex-shrink:0;overflow:visible;";
 
     /* Children row */
     var childRow = document.createElement("div");
     childRow.className = "org-children-row";
 
-    var childNodes = reports.map(function (child) {
+    var childCols = reports.map(function (child) {
       var col = document.createElement("div");
       col.className = "org-child-col";
       col.appendChild(buildNode(child, depth + 1));
       return col;
     });
-    childNodes.forEach(function (col) { childRow.appendChild(col); });
+    childCols.forEach(function (col) { childRow.appendChild(col); });
 
-    /* SVG placeholder — we size & draw it after DOM insertion */
-    var svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgEl.classList.add("org-connector-svg");
-    svgEl.setAttribute("height", String(VERT_GAP));
-    svgEl.style.width = "100%";
+    nodeWrap.appendChild(svgEl);
+    nodeWrap.appendChild(childRow);
 
-    wrap.appendChild(svgEl);
-    wrap.appendChild(childRow);
-
-    /* Schedule connector drawing after browser has laid out the DOM */
+    /* Draw connectors after layout is complete */
     requestAnimationFrame(function () {
-      drawConnectors(svgEl, card, childNodes, childRow, VERT_GAP, LINE_COLOR);
+      setTimeout(function () {
+        drawConnectors(svgEl, card, childCols);
+      }, 0);
     });
 
-    return wrap;
+    return nodeWrap;
   }
 
-  /* Draw the connector lines for one parent→children group */
-  function drawConnectors(svgEl, parentCard, childCols, childRow, vertGap, color) {
-    /* Measure everything relative to the SVG element */
+  /* Draw connectors for one parent → children group */
+  function drawConnectors(svgEl, parentCard, childCols) {
     var svgRect    = svgEl.getBoundingClientRect();
     var parentRect = parentCard.getBoundingClientRect();
 
-    if (svgRect.width === 0) return; /* not yet visible */
+    if (svgRect.width < 1) return;
 
-    /* Parent mid-x relative to SVG */
-    var parentMid = parentRect.left + parentRect.width / 2 - svgRect.left;
-
-    /* Vertical stem: from top of SVG (= bottom of card) down to mid-point */
-    var stemY = vertGap / 2;
-
-    /* Collect children mid-x positions */
-    var childMids = childCols.map(function (col) {
-      var r = col.getBoundingClientRect();
-      return r.left + r.width / 2 - svgRect.left;
-    });
-
-    var strokeW = "2";
-
-    /* Clear any previous drawing */
     while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
 
-    /* Vertical stem down from parent mid */
-    var vStem = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    vStem.setAttribute("x1", parentMid); vStem.setAttribute("y1", 0);
-    vStem.setAttribute("x2", parentMid); vStem.setAttribute("y2", stemY);
-    vStem.setAttribute("stroke", color); vStem.setAttribute("stroke-width", strokeW);
-    svgEl.appendChild(vStem);
+    var parentMid = parentRect.left + parentRect.width / 2 - svgRect.left;
+    var stemY     = Math.round(VERT_GAP / 2);
+
+    var childMids = childCols.map(function (col) {
+      var r = col.getBoundingClientRect();
+      return Math.round(r.left + r.width / 2 - svgRect.left);
+    });
+
+    /* Vertical stem from parent down to horizontal bar */
+    svgLine(svgEl, parentMid, 0, parentMid, stemY, LINE_COLOR);
 
     if (childMids.length === 1) {
-      /* Single child — just extend the vertical line */
-      var ext = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      ext.setAttribute("x1", childMids[0]); ext.setAttribute("y1", stemY);
-      ext.setAttribute("x2", childMids[0]); ext.setAttribute("y2", vertGap);
-      ext.setAttribute("stroke", color); ext.setAttribute("stroke-width", strokeW);
-      svgEl.appendChild(ext);
+      /* Single child: extend stem straight down */
+      svgLine(svgEl, childMids[0], stemY, childMids[0], VERT_GAP, LINE_COLOR);
+      svgArrow(svgEl, childMids[0], VERT_GAP, ARROW_COLOR);
     } else {
-      /* Horizontal bar across children */
+      /* Horizontal bar across all children */
       var leftX  = Math.min.apply(null, childMids);
       var rightX = Math.max.apply(null, childMids);
+      svgLine(svgEl, leftX, stemY, rightX, stemY, LINE_COLOR);
 
-      var hBar = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      hBar.setAttribute("x1", leftX);  hBar.setAttribute("y1", stemY);
-      hBar.setAttribute("x2", rightX); hBar.setAttribute("y2", stemY);
-      hBar.setAttribute("stroke", color); hBar.setAttribute("stroke-width", strokeW);
-      svgEl.appendChild(hBar);
-
-      /* Vertical drops to each child */
+      /* Vertical drops with arrowheads */
       childMids.forEach(function (mx) {
-        var vDrop = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        vDrop.setAttribute("x1", mx); vDrop.setAttribute("y1", stemY);
-        vDrop.setAttribute("x2", mx); vDrop.setAttribute("y2", vertGap);
-        vDrop.setAttribute("stroke", color); vDrop.setAttribute("stroke-width", strokeW);
-        svgEl.appendChild(vDrop);
+        svgLine(svgEl, mx, stemY, mx, VERT_GAP, LINE_COLOR);
+        svgArrow(svgEl, mx, VERT_GAP, ARROW_COLOR);
       });
     }
   }
 
-  /* Build tree and insert */
+  /* Build the container — multiple roots go side-by-side */
   var container = document.createElement("div");
   container.className = "org-tree-root";
-  roots.forEach(function (r) { container.appendChild(buildNode(r, 0)); });
+
+  if (roots.length > 1) {
+    /* Wrap multiple roots in a horizontal row */
+    var rootRow = document.createElement("div");
+    rootRow.style.cssText = "display:flex;flex-direction:row;align-items:flex-start;gap:40px;";
+    roots.forEach(function (r) { rootRow.appendChild(buildNode(r, 0)); });
+    container.appendChild(rootRow);
+  } else if (roots.length === 1) {
+    container.appendChild(buildNode(roots[0], 0));
+  } else {
+    /* Fallback: show all employees as roots if hierarchy is broken */
+    emps.forEach(function (e) { container.appendChild(buildNode(e, 0)); });
+  }
 
   wrap.innerHTML = "";
   wrap.style.overflow = "auto";
-  wrap.style.padding  = "12px 0";
+  wrap.style.padding  = "24px 16px";
   wrap.appendChild(container);
 
-  /* Re-draw connectors on window resize */
+  /* Redraw on resize */
   var resizeTimer;
-  window.addEventListener("resize", function () {
+  wrap._orgResizeHandler && window.removeEventListener("resize", wrap._orgResizeHandler);
+  wrap._orgResizeHandler = function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { renderOrgTree(); }, 200);
-  });
+    resizeTimer = setTimeout(function () { renderOrgTree(); }, 220);
+  };
+  window.addEventListener("resize", wrap._orgResizeHandler);
 }
 
 /* ══════════════════════════════
@@ -1442,18 +1459,16 @@ function renderOrgTree() {
    excludeId: employee being edited (excluded from manager list)
 ══════════════════════════════ */
 function populateDrawerDropdowns(excludeId) {
-  populateMasterSelect("df-gender",  "gender",  "Select gender");
-  populateMasterSelect("df-marital", "marital", "Select");
-  populateMasterSelect("df-blood",   "blood",   "Select");
-  populateMasterSelect("df-dept",    "department", "Select department");
-  populateMasterSelect("df-empType", "empType", "Select type");
-  populateMasterSelect("df-status",  "status",  "Select status");
+  populateMasterSelect("df-gender",   "gender",      "Select gender");
+  populateMasterSelect("df-marital",  "marital",     "Select marital status");
+  populateMasterSelect("df-blood",    "blood",       "Select blood group");
+  populateMasterSelect("df-dept",     "department",  "Select department");
+  populateMasterSelect("df-empType",  "empType",     "Select type");
+  populateMasterSelect("df-status",   "status",      "Select status");
+  populateMasterSelect("df-location", "location",    "Select location");
 
   /* Designation is a free-text input, but populate its datalist */
   populateDesigDatalist();
-
-  /* Location datalist */
-  populateLocationDatalist();
 
   /* Reporting Manager — employee picker */
   initManagerPicker(excludeId);
@@ -1463,13 +1478,6 @@ function populateDesigDatalist() {
   var dl = document.getElementById("df-desig-list");
   if (!dl) return;
   var vals = getMasterValues("designation");
-  dl.innerHTML = vals.map(function(v){ return '<option value="'+v+'">'; }).join("");
-}
-
-function populateLocationDatalist() {
-  var dl = document.getElementById("df-location-list");
-  if (!dl) return;
-  var vals = getMasterValues("location");
   dl.innerHTML = vals.map(function(v){ return '<option value="'+v+'">'; }).join("");
 }
 
@@ -1779,21 +1787,638 @@ function confirmDelete() {
 }
 
 /* ══════════════════════════════
-   EXPORT
+   IMPORT — TEMPLATE COLUMNS
 ══════════════════════════════ */
-function exportEmployees() {
+const IMPORT_COLUMNS = [
+  { key:"empCode",     label:"Emp Code",         required:true  },
+  { key:"firstName",   label:"First Name",        required:true  },
+  { key:"lastName",    label:"Last Name",         required:true  },
+  { key:"gender",      label:"Gender",            required:true  },
+  { key:"dob",         label:"Date of Birth",     required:true  },
+  { key:"marital",     label:"Marital Status",    required:false },
+  { key:"blood",       label:"Blood Group",       required:false },
+  { key:"email",       label:"Email",             required:true  },
+  { key:"mobile",      label:"Mobile",            required:true  },
+  { key:"currentAddr", label:"Current Address",   required:false },
+  { key:"permAddr",    label:"Permanent Address", required:false },
+  { key:"emergency",   label:"Emergency Contact", required:false },
+  { key:"dept",        label:"Department",        required:true  },
+  { key:"desig",       label:"Designation",       required:true  },
+  { key:"doj",         label:"Date of Joining",   required:true  },
+  { key:"empType",     label:"Employment Type",   required:false },
+  { key:"status",      label:"Status",            required:false },
+  { key:"manager",     label:"Reporting Manager", required:false },
+  { key:"location",    label:"Location",          required:false },
+  { key:"ctc",         label:"CTC (Annual)",      required:false },
+  { key:"pan",         label:"PAN Number",        required:false },
+  { key:"aadhaar",     label:"Aadhaar Number",    required:false },
+  { key:"uan",         label:"UAN Number",        required:false },
+  { key:"bank",        label:"Bank Account",      required:false },
+  { key:"ifsc",        label:"IFSC Code",         required:false },
+];
+
+/* ── State ── */
+let importStep       = 1;
+let importParsedRows = [];   // raw parsed objects from file
+let importValidRows  = [];   // validated employee objects
+let importErrorRows  = [];   // {row, errors[]}
+
+/* ── Open / Close ── */
+function openImportModal() {
+  importStep       = 1;
+  importParsedRows = [];
+  importValidRows  = [];
+  importErrorRows  = [];
+  _templateSelectedCols = null; // reset column selection
+  _syncImportStepUI();
+  _renderColumnsList();
+  /* Reset file input */
+  const fi = document.getElementById("importFileInput");
+  if (fi) fi.value = "";
+  document.getElementById("importFileChosen").style.display = "none";
+  document.getElementById("importDropZone").style.display   = "flex";
+  document.getElementById("importModal").style.display      = "flex";
+  document.body.style.overflow = "hidden";
+}
+function closeImportModal() {
+  document.getElementById("importModal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+/* ── Column selector state ── */
+// Track which optional columns are selected for the template download
+var _templateSelectedCols = null; // null = use all; initialised in _renderColumnsList
+
+/* ── Column list (step 1) — interactive selector ── */
+function _renderColumnsList() {
+  const el = document.getElementById("importColumnsList");
+  if (!el) return;
+
+  // Initialise selection: required always on, optionals all on by default
+  if (!_templateSelectedCols) {
+    _templateSelectedCols = {};
+    IMPORT_COLUMNS.forEach(function(c) { _templateSelectedCols[c.key] = true; });
+  }
+
+  // Header row
+  const optionalCount = IMPORT_COLUMNS.filter(function(c){ return !c.required; }).length;
+  const selectedOptional = IMPORT_COLUMNS.filter(function(c){ return !c.required && _templateSelectedCols[c.key]; }).length;
+
+  el.innerHTML =
+    '<div class="imp-col-selector-header">' +
+      '<div class="imp-col-selector-info">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+        '<span>Select which columns to include in the template. <strong>Mandatory columns</strong> cannot be removed.</span>' +
+      '</div>' +
+      '<div class="imp-col-selector-actions">' +
+        '<button class="imp-col-sel-btn" onclick="_templateSelectAll(true)">Select All Optional</button>' +
+        '<button class="imp-col-sel-btn" onclick="_templateSelectAll(false)">Deselect All Optional</button>' +
+        '<span class="imp-col-count" id="impColCount">' + (IMPORT_COLUMNS.filter(function(c){ return _templateSelectedCols[c.key]; }).length) + ' / ' + IMPORT_COLUMNS.length + ' columns</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="imp-col-grid" id="impColGrid">' +
+      IMPORT_COLUMNS.map(function(c) {
+        const checked = _templateSelectedCols[c.key];
+        const disabled = c.required;
+        return '<label class="imp-col-item' + (disabled ? ' imp-col-item-locked' : '') + (checked ? ' imp-col-item-checked' : '') + '" ' +
+          (disabled ? 'title="Mandatory — cannot be removed"' : '') + '>' +
+          '<input type="checkbox" ' + (checked ? 'checked' : '') + ' ' + (disabled ? 'disabled' : '') +
+            ' onchange="_templateToggleCol(\'' + c.key + '\', this.checked)" />' +
+          '<span class="imp-col-item-name">' + c.label + '</span>' +
+          (disabled
+            ? '<span class="imp-col-item-badge imp-col-item-badge-req">Required</span>'
+            : '<span class="imp-col-item-badge imp-col-item-badge-opt">Optional</span>') +
+        '</label>';
+      }).join("") +
+    '</div>';
+}
+
+function _templateToggleCol(key, checked) {
+  _templateSelectedCols[key] = checked;
+  // Update count badge
+  const count = IMPORT_COLUMNS.filter(function(c){ return _templateSelectedCols[c.key]; }).length;
+  const countEl = document.getElementById("impColCount");
+  if (countEl) countEl.textContent = count + ' / ' + IMPORT_COLUMNS.length + ' columns';
+  // Re-style the label
+  _renderColumnsList();
+}
+
+function _templateSelectAll(select) {
+  IMPORT_COLUMNS.forEach(function(c) {
+    if (!c.required) _templateSelectedCols[c.key] = select;
+  });
+  _renderColumnsList();
+}
+
+/* ── Download template (generates a real XLSX via SheetJS) ── */
+function downloadTemplate() {
+  // Build column list from selection (required always included)
+  const selectedCols = _templateSelectedCols
+    ? IMPORT_COLUMNS.filter(function(c){ return _templateSelectedCols[c.key]; })
+    : IMPORT_COLUMNS;
+
+  if (!selectedCols.length) {
+    showToast("Please select at least one column.", "error");
+    return;
+  }
+
+  // Full sample data map
+  const SAMPLE_MAP = {
+    empCode:"EMP008", firstName:"Rahul", lastName:"Verma", gender:"Male",
+    dob:"1995-06-20", marital:"Single", blood:"O+",
+    email:"rahul.verma@abcltd.com", mobile:"9988776655",
+    currentAddr:"123 MG Road, Mumbai", permAddr:"123 MG Road, Mumbai",
+    emergency:"Sunita Verma (Mother) - 9988700000",
+    dept:"IT", desig:"Developer", doj:"2025-07-01",
+    empType:"Full-Time", status:"Active", manager:"Arindam Maity",
+    location:"Mumbai", ctc:"750000",
+    pan:"ABCDE1234F", aadhaar:"123456789012", uan:"100123456789",
+    bank:"123456789012", ifsc:"SBIN0001234"
+  };
+
+  const headers        = selectedCols.map(function(c) { return c.label; });
+  const instructionRow = selectedCols.map(function(c) { return c.required ? "REQUIRED" : "Optional"; });
+  const sample         = selectedCols.map(function(c) { return SAMPLE_MAP[c.key] || ""; });
+
+  /* Use SheetJS if available, else fall back to CSV */
+  if (window.XLSX) {
+    const wb = XLSX.utils.book_new();
+    const wsData = [
+      ["PayNest Employee Import Template — Do NOT change column headers"],
+      [],
+      instructionRow,
+      headers,
+      sample
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws["!cols"] = headers.map(function() { return { wch: 22 }; });
+    ws["!merges"] = [{ s:{r:0,c:0}, e:{r:0,c:headers.length-1} }];
+    XLSX.utils.book_append_sheet(wb, ws, "Employees");
+    XLSX.writeFile(wb, "PayNest_Employee_Import_Template.xlsx");
+  } else {
+    const csv = [headers, sample].map(function(r) {
+      return r.map(function(v) { return '"' + (v||"") + '"'; }).join(",");
+    }).join("\n");
+    const blob = new Blob([csv], { type:"text/csv" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = "PayNest_Employee_Import_Template.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+  showToast("Template downloaded with " + selectedCols.length + " columns!", "success");
+}
+
+/* ── File handling ── */
+function handleImportDrop(event) {
+  event.preventDefault();
+  document.getElementById("importDropZone").classList.remove("dragover");
+  const file = event.dataTransfer.files[0];
+  if (file) _processImportFile(file);
+}
+function handleImportFile(input) {
+  const file = input.files[0];
+  if (file) _processImportFile(file);
+}
+function removeImportFile() {
+  importParsedRows = [];
+  const fi = document.getElementById("importFileInput");
+  if (fi) fi.value = "";
+  document.getElementById("importFileChosen").style.display = "none";
+  document.getElementById("importDropZone").style.display   = "flex";
+}
+
+function _processImportFile(file) {
+  const ext = file.name.split(".").pop().toLowerCase();
+  if (!["xlsx","xls","csv"].includes(ext)) {
+    showToast("Unsupported file type. Use .xlsx, .xls or .csv", "error");
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showToast("File too large (max 5MB).", "error");
+    return;
+  }
+
+  document.getElementById("importDropZone").style.display   = "none";
+  document.getElementById("importFileChosen").style.display = "flex";
+  document.getElementById("importFileName").textContent     = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      if (ext === "csv") {
+        _parseCSV(e.target.result);
+      } else {
+        if (!window.XLSX) {
+          /* Dynamically load SheetJS if not already present */
+          const script = document.createElement("script");
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+          script.onload = function() { _parseXLSX(e.target.result); };
+          document.head.appendChild(script);
+        } else {
+          _parseXLSX(e.target.result);
+        }
+      }
+    } catch(err) {
+      showToast("Error reading file: " + err.message, "error");
+    }
+  };
+  if (ext === "csv") {
+    reader.readAsText(file);
+  } else {
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+function _parseXLSX(arrayBuffer) {
+  const workbook  = XLSX.read(arrayBuffer, { type:"array" });
+  const sheetName = workbook.SheetNames[0];
+  const sheet     = workbook.Sheets[sheetName];
+  const rows      = XLSX.utils.sheet_to_json(sheet, { defval:"" });
+  _mapAndValidateRows(rows);
+}
+
+function _parseCSV(text) {
+  const lines   = text.trim().split(/\r?\n/);
+  if (lines.length < 2) { showToast("CSV is empty or has no data rows.", "error"); return; }
+  const headers = _splitCSVLine(lines[0]);
+  const rows    = [];
+  for (var i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = _splitCSVLine(lines[i]);
+    const obj  = {};
+    headers.forEach(function(h, idx) { obj[h.trim()] = (vals[idx] || "").trim(); });
+    rows.push(obj);
+  }
+  _mapAndValidateRows(rows);
+}
+
+function _splitCSVLine(line) {
+  const result = []; let cur = ""; let inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === "," && !inQ) { result.push(cur); cur = ""; }
+    else { cur += ch; }
+  }
+  result.push(cur);
+  return result.map(function(s) { return s.replace(/^"|"$/g,"").trim(); });
+}
+
+/* Map spreadsheet columns → employee object keys */
+function _mapAndValidateRows(rawRows) {
+  /* Build a label→key map (case-insensitive) */
+  const labelToKey = {};
+  IMPORT_COLUMNS.forEach(function(c) {
+    labelToKey[c.label.toLowerCase()]     = c.key;
+    labelToKey[c.key.toLowerCase()]       = c.key;    // also accept key directly
+  });
+
+  importParsedRows = [];
+  importValidRows  = [];
+  importErrorRows  = [];
+
+  const existingEmps = getEmployees();
+  const existingCodes = existingEmps.map(function(e) { return (e.empCode||e.id).toLowerCase(); });
+  let nextIdNum = existingEmps.reduce(function(max, e) {
+    var n = parseInt((e.id||"").replace("EMP",""), 10);
+    return isNaN(n) ? max : Math.max(max, n);
+  }, existingEmps.length);
+
+  rawRows.forEach(function(raw, rowIdx) {
+    /* Normalise keys */
+    var emp = {};
+    Object.keys(raw).forEach(function(k) {
+      var mapped = labelToKey[k.toLowerCase().trim()];
+      if (mapped) emp[mapped] = String(raw[k]).trim();
+    });
+
+    /* Validate required fields */
+    var errors = [];
+    IMPORT_COLUMNS.forEach(function(c) {
+      if (c.required && !emp[c.key]) {
+        errors.push(c.label + " is required");
+      }
+    });
+
+    /* Check duplicate emp code */
+    if (emp.empCode && existingCodes.includes(emp.empCode.toLowerCase())) {
+      errors.push('Emp Code "' + emp.empCode + '" already exists');
+    }
+
+    /* Assign new ID */
+    nextIdNum++;
+    emp.id     = emp.empCode || ("EMP" + String(nextIdNum).padStart(3,"0"));
+    emp.status = emp.status || "Active";
+
+    if (errors.length) {
+      importErrorRows.push({ rowIdx: rowIdx + 1, emp: emp, errors: errors });
+    } else {
+      importValidRows.push(emp);
+    }
+    importParsedRows.push({ rowIdx: rowIdx + 1, emp: emp, errors: errors });
+  });
+}
+
+/* ── Navigation ── */
+function importStepNext() {
+  if (importStep === 1) {
+    importStep = 2;
+    _syncImportStepUI();
+    return;
+  }
+  if (importStep === 2) {
+    if (!importParsedRows.length) {
+      showToast("Please upload a file first.", "error");
+      return;
+    }
+    importStep = 3;
+    _renderReviewStep();
+    _syncImportStepUI();
+    return;
+  }
+  if (importStep === 3) {
+    _doImport();
+  }
+}
+function importStepBack() {
+  if (importStep > 1) { importStep--; _syncImportStepUI(); }
+}
+
+function _syncImportStepUI() {
+  /* Step indicators */
+  [1,2,3].forEach(function(n) {
+    var ind = document.getElementById("impStep" + n + "Ind");
+    if (!ind) return;
+    ind.classList.remove("active","done");
+    if (n < importStep)       ind.classList.add("done");
+    else if (n === importStep) ind.classList.add("active");
+  });
+
+  /* Panels */
+  [1,2,3].forEach(function(n) {
+    var p = document.getElementById("impPanel" + n);
+    if (p) p.classList.toggle("active", n === importStep);
+  });
+
+  /* Footer buttons */
+  var backBtn = document.getElementById("impBackBtn");
+  var nextBtn = document.getElementById("impNextBtn");
+  if (backBtn) backBtn.style.display = importStep > 1 ? "" : "none";
+  if (nextBtn) {
+    if (importStep === 3) {
+      var canImport = importValidRows.length > 0;
+      nextBtn.textContent = "Import " + importValidRows.length + " Employees";
+      nextBtn.disabled    = !canImport;
+      nextBtn.style.opacity = canImport ? "1" : ".5";
+    } else {
+      nextBtn.textContent  = "Next →";
+      nextBtn.disabled     = false;
+      nextBtn.style.opacity = "1";
+    }
+  }
+}
+
+/* ── Review step rendering ── */
+function _renderReviewStep() {
+  /* Stats chips */
+  const statsEl = document.getElementById("importReviewStats");
+  if (statsEl) {
+    statsEl.innerHTML =
+      '<div class="import-stat-chip total"><div class="import-stat-num">' + importParsedRows.length + '</div><div>Total Rows</div></div>' +
+      '<div class="import-stat-chip valid"><div class="import-stat-num">' + importValidRows.length + '</div><div>Valid</div></div>' +
+      '<div class="import-stat-chip errors"><div class="import-stat-num">' + importErrorRows.length + '</div><div>Errors</div></div>';
+  }
+
+  /* Error list */
+  const errEl = document.getElementById("importReviewErrors");
+  if (errEl) {
+    if (importErrorRows.length) {
+      errEl.style.display = "";
+      errEl.innerHTML = '<strong style="display:block;margin-bottom:4px;">⚠ Rows with errors (will be skipped):</strong>' +
+        importErrorRows.map(function(e) {
+          return '<div class="import-err-row">Row ' + e.rowIdx + ' — ' + e.errors.join("; ") + '</div>';
+        }).join("");
+    } else {
+      errEl.style.display = "none";
+    }
+  }
+
+  /* Preview table — show all parsed rows */
+  const previewCols = ["empCode","firstName","lastName","dept","desig","doj","status","email","mobile"];
+  const previewLabels = ["Emp Code","First Name","Last Name","Department","Designation","DOJ","Status","Email","Mobile"];
+
+  const tableEl = document.getElementById("importPreviewTable");
+  if (!tableEl) return;
+
+  const thead = "<thead><tr><th>#</th>" + previewLabels.map(function(l) {
+    return "<th>" + l + "</th>";
+  }).join("") + "<th>Status</th></tr></thead>";
+
+  const tbody = "<tbody>" + importParsedRows.map(function(r) {
+    var hasError = r.errors.length > 0;
+    var cls      = hasError ? "row-error" : "row-ok";
+    var statusCell = hasError
+      ? '<td style="color:#EF4444;font-weight:700;">⚠ Skip</td>'
+      : '<td style="color:#10B981;font-weight:700;">✓ Import</td>';
+    return "<tr class='" + cls + "'><td>" + r.rowIdx + "</td>" +
+      previewCols.map(function(k) { return "<td>" + escHtml(r.emp[k] || "—") + "</td>"; }).join("") +
+      statusCell + "</tr>";
+  }).join("") + "</tbody>";
+
+  tableEl.innerHTML = thead + tbody;
+}
+
+/* ── Actually save valid rows ── */
+function _doImport() {
+  if (!importValidRows.length) { showToast("No valid rows to import.", "error"); return; }
   const emps    = getEmployees();
-  const headers = ["Emp ID","Name","Department","Designation","DOJ","Status","Email","Mobile"];
-  const rows    = emps.map(e => [
-    e.empCode||e.id, e.firstName+" "+e.lastName,
-    e.dept,e.desig, e.doj?formatDisplayDate(e.doj):"", e.status,e.email,e.mobile
-  ]);
-  const csv  = [headers,...rows].map(r => r.map(v => '"'+(v||"")+'"').join(",")).join("\n");
-  const blob = new Blob([csv], { type:"text/csv" });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a"); a.href=url; a.download="employees.csv"; a.click();
-  URL.revokeObjectURL(url);
-  showToast("Exported successfully!", "success");
+  const newEmps = emps.concat(importValidRows);
+  saveEmployees(newEmps);
+  closeImportModal();
+  renderDirectory();
+  populateFilterDropdowns();
+  filterDirectory();
+  showToast(importValidRows.length + " employee" + (importValidRows.length !== 1 ? "s" : "") + " imported successfully!", "success");
+}
+
+/* ══════════════════════════════
+   EXPORT — Column Picker Modal
+══════════════════════════════ */
+
+// All exportable columns (superset — includes all employee fields)
+const EXPORT_COLUMNS = [
+  { key:"empCode",     label:"Emp Code",            group:"Basic",      locked:true },
+  { key:"firstName",   label:"First Name",           group:"Basic"      },
+  { key:"lastName",    label:"Last Name",            group:"Basic"      },
+  { key:"gender",      label:"Gender",               group:"Personal"   },
+  { key:"dob",         label:"Date of Birth",        group:"Personal"   },
+  { key:"marital",     label:"Marital Status",       group:"Personal"   },
+  { key:"blood",       label:"Blood Group",          group:"Personal"   },
+  { key:"email",       label:"Email",                group:"Contact"    },
+  { key:"mobile",      label:"Mobile",               group:"Contact"    },
+  { key:"currentAddr", label:"Current Address",      group:"Contact"    },
+  { key:"permAddr",    label:"Permanent Address",    group:"Contact"    },
+  { key:"emergency",   label:"Emergency Contact",    group:"Contact"    },
+  { key:"dept",        label:"Department",           group:"Employment" },
+  { key:"desig",       label:"Designation",          group:"Employment" },
+  { key:"doj",         label:"Date of Joining",      group:"Employment" },
+  { key:"empType",     label:"Employment Type",      group:"Employment" },
+  { key:"status",      label:"Status",               group:"Employment" },
+  { key:"manager",     label:"Reporting Manager",    group:"Employment" },
+  { key:"location",    label:"Location",             group:"Employment" },
+  { key:"ctc",         label:"CTC (Annual)",         group:"Employment" },
+  { key:"pan",         label:"PAN Number",           group:"Statutory"  },
+  { key:"aadhaar",     label:"Aadhaar Number",       group:"Statutory"  },
+  { key:"uan",         label:"UAN Number",           group:"Statutory"  },
+  { key:"esi",         label:"ESI Number",           group:"Statutory"  },
+  { key:"bank",        label:"Bank Account",         group:"Statutory"  },
+  { key:"ifsc",        label:"IFSC Code",            group:"Statutory"  },
+];
+
+let _exportSelectedCols = null; // initialised when modal opens
+
+function exportEmployees() {
+  // Open column picker modal instead of direct download
+  _openExportModal();
+}
+
+function _openExportModal() {
+  // Default: select basic + employment columns
+  _exportSelectedCols = {};
+  EXPORT_COLUMNS.forEach(function(c) {
+    _exportSelectedCols[c.key] = ["Basic","Employment"].includes(c.group);
+  });
+  _renderExportModal();
+  document.getElementById("exportModal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeExportModal() {
+  document.getElementById("exportModal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function _renderExportModal() {
+  const el = document.getElementById("exportColGrid");
+  if (!el) return;
+
+  const groups = [...new Set(EXPORT_COLUMNS.map(function(c){ return c.group; }))];
+  const selectedCount = EXPORT_COLUMNS.filter(function(c){ return _exportSelectedCols[c.key]; }).length;
+  const countEl = document.getElementById("exportColCount");
+  if (countEl) countEl.textContent = selectedCount + " / " + EXPORT_COLUMNS.length + " columns selected";
+
+  el.innerHTML = groups.map(function(group) {
+    const cols = EXPORT_COLUMNS.filter(function(c){ return c.group === group; });
+    // For group header checkbox: only consider non-locked columns
+    const freeCols = cols.filter(function(c){ return !c.locked; });
+    const allChecked = cols.every(function(c){ return _exportSelectedCols[c.key]; });
+    const someChecked = cols.some(function(c){ return _exportSelectedCols[c.key]; });
+    // Group checkbox disabled if all cols in group are locked
+    const groupDisabled = freeCols.length === 0;
+    return '<div class="exp-col-group">' +
+      '<div class="exp-col-group-header">' +
+        '<label class="exp-col-group-label">' +
+          '<input type="checkbox" ' + (allChecked ? 'checked' : someChecked ? 'indeterminate' : '') +
+            (groupDisabled ? ' disabled' : ' onchange="_exportToggleGroup(\'' + group + '\', this.checked)"') +
+            ' id="expGroup-' + group + '" />' +
+          '<span>' + group + '</span>' +
+        '</label>' +
+        '<span class="exp-col-group-count">' + cols.filter(function(c){ return _exportSelectedCols[c.key]; }).length + '/' + cols.length + '</span>' +
+      '</div>' +
+      '<div class="exp-col-items">' +
+        cols.map(function(c) {
+          const isLocked = !!c.locked;
+          return '<label class="exp-col-item' +
+            (_exportSelectedCols[c.key] ? ' exp-col-item-checked' : '') +
+            (isLocked ? ' exp-col-item-locked' : '') + '"' +
+            (isLocked ? ' title="Emp Code is always included in the export"' : '') + '>' +
+            '<input type="checkbox" ' + (_exportSelectedCols[c.key] ? 'checked' : '') +
+              (isLocked ? ' disabled' : ' onchange="_exportToggleCol(\'' + c.key + '\', this.checked)"') + ' />' +
+            '<span>' + c.label + '</span>' +
+            (isLocked ? '<span class="exp-col-fixed-badge">Fixed</span>' : '') +
+          '</label>';
+        }).join("") +
+      '</div>' +
+    '</div>';
+  }).join("");
+
+  // Fix indeterminate state after render
+  groups.forEach(function(group) {
+    const cols = EXPORT_COLUMNS.filter(function(c){ return c.group === group; });
+    const allC = cols.every(function(c){ return _exportSelectedCols[c.key]; });
+    const someC = cols.some(function(c){ return _exportSelectedCols[c.key]; });
+    const el2 = document.getElementById("expGroup-" + group);
+    if (el2) el2.indeterminate = !allC && someC;
+  });
+}
+
+function _exportToggleCol(key, checked) {
+  const col = EXPORT_COLUMNS.find(function(c){ return c.key === key; });
+  if (col && col.locked) return; // cannot deselect locked columns
+  _exportSelectedCols[key] = checked;
+  _renderExportModal();
+}
+
+function _exportToggleGroup(group, checked) {
+  EXPORT_COLUMNS.filter(function(c){ return c.group === group && !c.locked; }).forEach(function(c){
+    _exportSelectedCols[c.key] = checked;
+  });
+  _renderExportModal();
+}
+
+function _exportSelectAllCols(select) {
+  EXPORT_COLUMNS.forEach(function(c){
+    if (!c.locked) _exportSelectedCols[c.key] = select; // locked columns always stay selected
+  });
+  _renderExportModal();
+}
+
+function _doExport() {
+  const selectedCols = EXPORT_COLUMNS.filter(function(c){ return _exportSelectedCols[c.key]; });
+  if (!selectedCols.length) {
+    showToast("Please select at least one column to export.", "error");
+    return;
+  }
+
+  const emps = getEmployees();
+  if (!emps.length) {
+    showToast("No employees to export.", "error");
+    return;
+  }
+
+  const headers = selectedCols.map(function(c){ return c.label; });
+  const rows = emps.map(function(e) {
+    return selectedCols.map(function(c) {
+      var val = e[c.key] || "";
+      // Format dates
+      if ((c.key === "dob" || c.key === "doj") && val) val = formatDisplayDate(val);
+      // Format CTC
+      if (c.key === "ctc" && val) val = val;
+      // Full name handling (firstName/lastName exported individually here)
+      return val;
+    });
+  });
+
+  if (window.XLSX) {
+    const wb = XLSX.utils.book_new();
+    const wsData = [headers, ...rows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws["!cols"] = headers.map(function(){ return { wch: 20 }; });
+    XLSX.utils.book_append_sheet(wb, ws, "Employees");
+    XLSX.writeFile(wb, "PayNest_Employees_Export.xlsx");
+  } else {
+    const csv = [headers, ...rows].map(function(r){
+      return r.map(function(v){ return '"' + String(v||"").replace(/"/g,'""') + '"'; }).join(",");
+    }).join("\n");
+    const blob = new Blob([csv], { type:"text/csv" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = "PayNest_Employees_Export.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  closeExportModal();
+  showToast(emps.length + " employees exported with " + selectedCols.length + " columns!", "success");
 }
 
 /* ══════════════════════════════
@@ -1831,6 +2456,10 @@ function calcAge(dob) {
   let age = today.getFullYear() - d.getFullYear();
   if (today.getMonth() - d.getMonth() < 0 || (today.getMonth()===d.getMonth() && today.getDate()<d.getDate())) age--;
   return age;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
 /* Logout — works even if app.js not loaded */
