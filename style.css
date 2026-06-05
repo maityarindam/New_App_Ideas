@@ -330,7 +330,51 @@ body.login-body {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
-.topbar-breadcrumb { position: relative; }
+/* Breadcrumb parent + separator (used on sub-pages like Masters) */
+.topbar-crumb-parent {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: color .18s, border-color .18s;
+  white-space: nowrap;
+}
+.topbar-crumb-parent:hover {
+  color: var(--primary);
+  border-color: var(--primary-light);
+}
+.topbar-crumb-sep {
+  display: inline-flex;
+  align-items: center;
+  color: var(--border);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+/* Dark mode */
+body.dark-mode .topbar-crumb-parent {
+  background: #211f33;
+  border-color: var(--border);
+  color: var(--muted);
+}
+body.dark-mode .topbar-crumb-parent:hover {
+  color: var(--primary-light);
+  border-color: var(--primary-light);
+}
+body.dark-mode .topbar-crumb-sep { color: var(--border); }
+
+.topbar-breadcrumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .topbar-page-select {
   display: flex; align-items: center; gap: 5px;
   font-size: 13px; font-weight: 600; color: var(--text);

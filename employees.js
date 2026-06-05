@@ -1282,10 +1282,10 @@ function renderOrgTree() {
   function lc(depth) { return levelColors[Math.min(depth, levelColors.length - 1)]; }
 
   var isDark     = document.body.classList.contains("dark-mode");
-  var LINE_COLOR = isDark ? "#4B5563" : "#CBD5E1";
-  var ARROW_COLOR= isDark ? "#6B7280" : "#94A3B8";
-  var VERT_GAP   = 56;  /* space between card bottom and children top */
-  var ARROW_SIZE = 7;   /* arrowhead size in px */
+  var LINE_COLOR = isDark ? "#4B5563" : "#94A3B8";
+  var ARROW_COLOR= isDark ? "#4B5563" : "#94A3B8";  /* same as line — solid filled triangle */
+  var VERT_GAP   = 56;
+  var ARROW_SIZE = 8;   /* slightly larger filled triangle */
 
   var allNames = emps.map(function (e) {
     return (e.firstName + " " + e.lastName).toLowerCase();
@@ -1402,8 +1402,8 @@ function renderOrgTree() {
     svgLine(svgEl, parentMid, 0, parentMid, stemY, LINE_COLOR);
 
     if (childMids.length === 1) {
-      /* Single child: extend stem straight down */
-      svgLine(svgEl, childMids[0], stemY, childMids[0], VERT_GAP, LINE_COLOR);
+      /* Single child: extend stem straight down, stop at arrowhead base */
+      svgLine(svgEl, childMids[0], stemY, childMids[0], VERT_GAP - ARROW_SIZE, LINE_COLOR);
       svgArrow(svgEl, childMids[0], VERT_GAP, ARROW_COLOR);
     } else {
       /* Horizontal bar across all children */
@@ -1411,9 +1411,9 @@ function renderOrgTree() {
       var rightX = Math.max.apply(null, childMids);
       svgLine(svgEl, leftX, stemY, rightX, stemY, LINE_COLOR);
 
-      /* Vertical drops with arrowheads */
+      /* Vertical drops with filled arrowheads — lines stop at arrowhead base */
       childMids.forEach(function (mx) {
-        svgLine(svgEl, mx, stemY, mx, VERT_GAP, LINE_COLOR);
+        svgLine(svgEl, mx, stemY, mx, VERT_GAP - ARROW_SIZE, LINE_COLOR);
         svgArrow(svgEl, mx, VERT_GAP, ARROW_COLOR);
       });
     }
