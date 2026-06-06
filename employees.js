@@ -1282,10 +1282,10 @@ function renderOrgTree() {
   function lc(depth) { return levelColors[Math.min(depth, levelColors.length - 1)]; }
 
   var isDark     = document.body.classList.contains("dark-mode");
-  var LINE_COLOR = isDark ? "#4B5563" : "#94A3B8";
-  var ARROW_COLOR= isDark ? "#4B5563" : "#94A3B8";  /* same as line — solid filled triangle */
-  var VERT_GAP   = 56;
-  var ARROW_SIZE = 8;   /* slightly larger filled triangle */
+  var LINE_COLOR = isDark ? "#4B5563" : "#CBD5E1";
+  var ARROW_COLOR= isDark ? "#6B7280" : "#94A3B8";
+  var VERT_GAP   = 56;  /* space between card bottom and children top */
+  var ARROW_SIZE = 7;   /* arrowhead size in px */
 
   var allNames = emps.map(function (e) {
     return (e.firstName + " " + e.lastName).toLowerCase();
@@ -1402,8 +1402,8 @@ function renderOrgTree() {
     svgLine(svgEl, parentMid, 0, parentMid, stemY, LINE_COLOR);
 
     if (childMids.length === 1) {
-      /* Single child: extend stem straight down, stop at arrowhead base */
-      svgLine(svgEl, childMids[0], stemY, childMids[0], VERT_GAP - ARROW_SIZE, LINE_COLOR);
+      /* Single child: extend stem straight down */
+      svgLine(svgEl, childMids[0], stemY, childMids[0], VERT_GAP, LINE_COLOR);
       svgArrow(svgEl, childMids[0], VERT_GAP, ARROW_COLOR);
     } else {
       /* Horizontal bar across all children */
@@ -1411,9 +1411,9 @@ function renderOrgTree() {
       var rightX = Math.max.apply(null, childMids);
       svgLine(svgEl, leftX, stemY, rightX, stemY, LINE_COLOR);
 
-      /* Vertical drops with filled arrowheads — lines stop at arrowhead base */
+      /* Vertical drops with arrowheads */
       childMids.forEach(function (mx) {
-        svgLine(svgEl, mx, stemY, mx, VERT_GAP - ARROW_SIZE, LINE_COLOR);
+        svgLine(svgEl, mx, stemY, mx, VERT_GAP, LINE_COLOR);
         svgArrow(svgEl, mx, VERT_GAP, ARROW_COLOR);
       });
     }
@@ -1743,22 +1743,21 @@ function saveDrawerEmployee() {
     if (photoSrc) data.photo = photoSrc;
     emps.push(data);
     saveEmployees(emps);
+    logActivity("emp_add", "New employee <strong>" + data.firstName + " " + data.lastName + "</strong> was added", newId);
     showToast("Employee added successfully!", "success");
     closeDrawer();
-    /* Go directly to new employee's profile */
     viewProfile(newId);
   } else {
     const idx = emps.findIndex(e => e.id === currentProfileId);
     if (idx !== -1) {
       data.id = currentProfileId;
-      /* Preserve existing photo if no new one uploaded */
       data.photo = photoSrc || emps[idx].photo || null;
       emps[idx] = data;
     }
     saveEmployees(emps);
+    logActivity("emp_edit", "Employee profile updated for <strong>" + data.firstName + " " + data.lastName + "</strong>", currentProfileId);
     showToast("Employee updated successfully!", "success");
     closeDrawer();
-    /* Return to profile view */
     renderProfile();
   }
 }
@@ -1776,8 +1775,11 @@ function closeDeleteModal() {
 }
 function confirmDelete() {
   if (!deleteTargetId) return;
+  const target = getEmployees().find(e => e.id === deleteTargetId);
+  const name = target ? target.firstName + " " + target.lastName : deleteTargetId;
   let emps = getEmployees().filter(e => e.id !== deleteTargetId);
   saveEmployees(emps);
+  logActivity("emp_delete", "Employee <strong>" + name + "</strong> was deleted", null);
   if (currentProfileId === deleteTargetId) currentProfileId = null;
   deleteTargetId = null;
   closeDeleteModal();
@@ -2465,4 +2467,206 @@ function escHtml(str) {
 /* Logout — works even if app.js not loaded */
 if (typeof window.logout === "undefined") {
   window.logout = function () { sessionStorage.clear(); window.location.replace("index.html"); };
+}
+
+/* ══════════════════════════════
+   ACTIVITY LOG BRIDGE
+   Delegates to app.js logActivity if available,
+   otherwise writes directly to sessionStorage.
+══════════════════════════════ */
+function logActivity(type, message, entityId) {
+  var ACTIVITY_KEY = "paynest_activity_log";
+  try {
+    var log = JSON.parse(sessionStorage.getItem(ACTIVITY_KEY) || "[]");
+    log.unshift({ id:"a"+Date.now(), type:type, message:message, entityId:entityId||null, ts:Date.now() });
+    if (log.length > 50) log = log.slice(0,50);
+    sessionStorage.setItem(ACTIVITY_KEY, JSON.stringify(log));
+  } catch(e) {}
+}
+
+
+/* ══════════════════════════════
+   PHOTO CROP
+   Canvas-based circular crop for profile photo
+══════════════════════════════ */
+var _cropImage    = null;
+var _cropZoom     = 1;
+var _cropOffsetX  = 0;
+var _cropOffsetY  = 0;
+var _cropDragging = false;
+var _cropDragStartX = 0;
+var _cropDragStartY = 0;
+var _cropOrigOffX = 0;
+var _cropOrigOffY = 0;
+var _cropTarget   = null; /* "drawer" | "profile" */
+
+function openPhotoCropModal(src, target) {
+  _cropTarget  = target || "drawer";
+  _cropZoom    = 1;
+  _cropOffsetX = 0;
+  _cropOffsetY = 0;
+
+  var modal = document.getElementById("photoCropModal");
+  var canvas = document.getElementById("cropCanvas");
+  var zoomIn = document.getElementById("cropZoom");
+  if (!modal || !canvas) return;
+
+  if (zoomIn) zoomIn.value = 1;
+
+  var img = new Image();
+  img.onload = function() {
+    _cropImage = img;
+    drawCropCanvas();
+    modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+  };
+  img.src = src;
+
+  /* Drag handlers */
+  canvas.onmousedown = function(e) {
+    _cropDragging  = true;
+    _cropDragStartX = e.clientX;
+    _cropDragStartY = e.clientY;
+    _cropOrigOffX  = _cropOffsetX;
+    _cropOrigOffY  = _cropOffsetY;
+  };
+  canvas.ontouchstart = function(e) {
+    var t = e.touches[0];
+    _cropDragging  = true;
+    _cropDragStartX = t.clientX;
+    _cropDragStartY = t.clientY;
+    _cropOrigOffX  = _cropOffsetX;
+    _cropOrigOffY  = _cropOffsetY;
+  };
+  window.onmousemove = function(e) {
+    if (!_cropDragging) return;
+    _cropOffsetX = _cropOrigOffX + (e.clientX - _cropDragStartX);
+    _cropOffsetY = _cropOrigOffY + (e.clientY - _cropDragStartY);
+    drawCropCanvas();
+  };
+  window.ontouchmove = function(e) {
+    if (!_cropDragging) return;
+    var t = e.touches[0];
+    _cropOffsetX = _cropOrigOffX + (t.clientX - _cropDragStartX);
+    _cropOffsetY = _cropOrigOffY + (t.clientY - _cropDragStartY);
+    drawCropCanvas();
+  };
+  window.onmouseup = window.ontouchend = function() { _cropDragging = false; };
+}
+
+function drawCropCanvas() {
+  var canvas = document.getElementById("cropCanvas");
+  if (!canvas || !_cropImage) return;
+  var ctx  = canvas.getContext("2d");
+  var size = canvas.width;
+  ctx.clearRect(0, 0, size, size);
+
+  /* Draw image */
+  var iw = _cropImage.naturalWidth  * _cropZoom;
+  var ih = _cropImage.naturalHeight * _cropZoom;
+  var ix = size/2 - iw/2 + _cropOffsetX;
+  var iy = size/2 - ih/2 + _cropOffsetY;
+  ctx.drawImage(_cropImage, ix, iy, iw, ih);
+
+  /* Dark overlay outside circle */
+  ctx.save();
+  ctx.fillStyle = "rgba(0,0,0,0.45)";
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  /* Circle border */
+  ctx.strokeStyle = "#7C3AED";
+  ctx.lineWidth   = 2;
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI*2);
+  ctx.stroke();
+}
+
+function updateCrop() {
+  var z = document.getElementById("cropZoom");
+  _cropZoom = parseFloat(z ? z.value : 1);
+  drawCropCanvas();
+}
+
+function applyPhotoCrop() {
+  var canvas = document.getElementById("cropCanvas");
+  if (!canvas || !_cropImage) return;
+
+  /* Export circular crop to a new canvas */
+  var out    = document.createElement("canvas");
+  var size   = canvas.width;
+  out.width  = size;
+  out.height = size;
+  var ctx    = out.getContext("2d");
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size/2, 0, Math.PI*2);
+  ctx.closePath();
+  ctx.clip();
+  var iw = _cropImage.naturalWidth  * _cropZoom;
+  var ih = _cropImage.naturalHeight * _cropZoom;
+  var ix = size/2 - iw/2 + _cropOffsetX;
+  var iy = size/2 - ih/2 + _cropOffsetY;
+  ctx.drawImage(_cropImage, ix, iy, iw, ih);
+
+  var dataUrl = out.toDataURL("image/png");
+  cancelPhotoCrop();
+
+  if (_cropTarget === "drawer") {
+    /* Apply to drawer preview */
+    var preview     = document.getElementById("df-photoPreview");
+    var placeholder = document.getElementById("df-photoPlaceholder");
+    if (preview)     { preview.src = dataUrl; preview.style.display = "block"; }
+    if (placeholder) placeholder.style.display = "none";
+  } else {
+    /* Apply to profile hero avatar */
+    var avatarEl = document.getElementById("profAvatar");
+    if (avatarEl) avatarEl.innerHTML = '<img src="' + dataUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>';
+    /* Persist to employee record */
+    if (currentProfileId) {
+      var emps = getEmployees();
+      var idx  = emps.findIndex(function(e){ return e.id === currentProfileId; });
+      if (idx !== -1) { emps[idx].photo = dataUrl; saveEmployees(emps); }
+    }
+  }
+}
+
+function cancelPhotoCrop() {
+  var modal = document.getElementById("photoCropModal");
+  if (modal) modal.style.display = "none";
+  document.body.style.overflow = "";
+  _cropImage = null;
+  window.onmousemove = null;
+  window.ontouchmove = null;
+  window.onmouseup  = null;
+  window.ontouchend = null;
+}
+
+/* Hook photo upload in drawer to open crop instead of direct preview */
+function handleEmpPhotoUpload(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    openPhotoCropModal(e.target.result, "drawer");
+  };
+  reader.readAsDataURL(file);
+}
+
+/* Profile hero photo — clicking avatar when in profile view */
+function openProfilePhotoCrop() {
+  var input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.onchange = function() {
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) { openPhotoCropModal(e.target.result, "profile"); };
+    reader.readAsDataURL(file);
+  };
+  input.click();
 }

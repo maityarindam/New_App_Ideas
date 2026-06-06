@@ -120,6 +120,9 @@ function initDashboard() {
   initGlobalSearch();
   initHolidays();
   initClock();
+  initNotifications();
+  initActivityFeed();
+  initDateRangePicker();
 }
 
 
@@ -1146,4 +1149,258 @@ function renderHolModalBody() {
       ${rows}
     </div>`;
   }).join("");
+}
+
+
+/* ══════════════════════════════
+   ACTIVITY LOG  (shared across pages)
+══════════════════════════════ */
+const ACTIVITY_KEY = "paynest_activity_log";
+
+const ACTIVITY_ICONS = {
+  emp_add:    { cls:"act-purple", svg:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>' },
+  emp_edit:   { cls:"act-blue",   svg:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' },
+  emp_delete: { cls:"act-red",    svg:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>' },
+  doc_upload: { cls:"act-green",  svg:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' },
+  payroll:    { cls:"act-green",  svg:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/></svg>' },
+  salary:     { cls:"act-blue",   svg:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="6" y1="5" x2="18" y2="5"/><line x1="6" y1="10" x2="18" y2="10"/><path d="M6 10l7 9"/><path d="M6 5h5a4 4 0 0 1 0 5H6"/></svg>' },
+  login:      { cls:"act-purple", svg:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>' },
+  default:    { cls:"act-purple", svg:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' }
+};
+
+function getActivityLog() {
+  try { return JSON.parse(sessionStorage.getItem(ACTIVITY_KEY) || "[]"); } catch(e) { return []; }
+}
+function saveActivityLog(log) {
+  sessionStorage.setItem(ACTIVITY_KEY, JSON.stringify(log));
+}
+
+function logActivity(type, message, entityId) {
+  var log = getActivityLog();
+  log.unshift({ id: "a" + Date.now(), type: type, message: message, entityId: entityId || null, ts: Date.now() });
+  if (log.length > 50) log = log.slice(0, 50);
+  saveActivityLog(log);
+  /* Update dashboard if open */
+  renderActivityFeed();
+  updateNotifBadge();
+}
+
+function renderActivityFeed() {
+  var list = document.getElementById("activityList");
+  if (!list) return;
+  var log = getActivityLog();
+
+  if (!log.length) {
+    /* Seed with some initial activities */
+    log = [
+      { id:"a1", type:"emp_add",  message:"New employee <strong>Arindam Maity</strong> was added",           ts: Date.now() - 7200000  },
+      { id:"a2", type:"payroll",  message:"Payroll for <strong>March 2026</strong> has been processed",       ts: Date.now() - 18000000 },
+      { id:"a3", type:"doc_upload",message:"Document uploaded for <strong>Rohit Sharma</strong>",             ts: Date.now() - 86400000 },
+      { id:"a4", type:"emp_edit", message:"Employee profile updated for <strong>Sneha Das</strong>",          ts: Date.now() - 172800000},
+      { id:"a5", type:"login",    message:"Admin logged in from <strong>Kolkata</strong>",                    ts: Date.now() - 259200000}
+    ];
+    saveActivityLog(log);
+  }
+
+  list.innerHTML = log.slice(0, 8).map(function(a) {
+    var ic = ACTIVITY_ICONS[a.type] || ACTIVITY_ICONS.default;
+    return '<div class="act-item">' +
+      '<div class="act-icon ' + ic.cls + '">' + ic.svg + '</div>' +
+      '<div class="act-text">' +
+        '<span>' + a.message + '</span>' +
+        '<span class="act-time">' + timeAgo(a.ts) + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join("") || '<div style="padding:12px;font-size:12px;color:var(--muted);">No recent activity.</div>';
+}
+
+function initActivityFeed() {
+  renderActivityFeed();
+  /* Refresh every 30s */
+  setInterval(renderActivityFeed, 30000);
+}
+
+function clearActivityLog() {
+  saveActivityLog([]);
+  renderActivityFeed();
+  updateNotifBadge();
+}
+
+function timeAgo(ts) {
+  var diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60)   return "Just now";
+  if (diff < 3600) return Math.floor(diff/60) + " min ago";
+  if (diff < 86400)return Math.floor(diff/3600) + " hr" + (Math.floor(diff/3600)>1?"s":"") + " ago";
+  var d = Math.floor(diff/86400);
+  return d + " day" + (d>1?"s":"") + " ago";
+}
+
+
+/* ══════════════════════════════
+   NOTIFICATIONS
+══════════════════════════════ */
+const NOTIF_KEY = "paynest_notifications";
+
+function getNotifications() {
+  try { return JSON.parse(sessionStorage.getItem(NOTIF_KEY) || "null"); } catch(e) { return null; }
+}
+function saveNotifications(list) {
+  sessionStorage.setItem(NOTIF_KEY, JSON.stringify(list));
+}
+
+function initNotifications() {
+  var btn     = document.getElementById("notifBtn");
+  var panel   = document.getElementById("notifPanel");
+  var wrapper = document.getElementById("notifWrapper");
+  if (!btn || !panel) return;
+
+  /* Seed notifications if none */
+  var notifs = getNotifications();
+  if (!notifs) {
+    notifs = [
+      { id:"n1", type:"birthday",  title:"Birthday Today 🎂",       body:"Sneha Das turns 32 today. Send wishes!",          read:false, ts: Date.now() - 3600000  },
+      { id:"n2", type:"confirm",   title:"Confirmation Due",         body:"Vikram Patel's probation ends in 3 days.",          read:false, ts: Date.now() - 7200000  },
+      { id:"n3", type:"payroll",   title:"Payroll Reminder",         body:"April 2026 payroll is due in 5 days.",              read:false, ts: Date.now() - 86400000 },
+      { id:"n4", type:"document",  title:"Document Expiring",        body:"PAN card for Rohit Sharma expires this month.",     read:true,  ts: Date.now() - 172800000},
+      { id:"n5", type:"leave",     title:"Leave Request Pending",    body:"3 leave requests awaiting your approval.",           read:true,  ts: Date.now() - 259200000}
+    ];
+    saveNotifications(notifs);
+  }
+
+  /* Toggle panel */
+  btn.addEventListener("click", function(e) {
+    e.stopPropagation();
+    panel.classList.toggle("open");
+    if (panel.classList.contains("open")) {
+      renderNotifPanel();
+    }
+  });
+  document.addEventListener("click", function(e) {
+    if (wrapper && !wrapper.contains(e.target)) panel.classList.remove("open");
+  });
+
+  updateNotifBadge();
+}
+
+function updateNotifBadge() {
+  var badge  = document.getElementById("notifBadge");
+  var notifs = getNotifications() || [];
+  var unread = notifs.filter(function(n) { return !n.read; }).length;
+  if (badge) badge.textContent = unread || "";
+  if (badge) badge.style.display = unread ? "" : "none";
+}
+
+function renderNotifPanel() {
+  var list   = document.getElementById("notifPanelList");
+  if (!list) return;
+  var notifs = getNotifications() || [];
+
+  if (!notifs.length) {
+    list.innerHTML = '<div class="notif-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><p>No notifications</p></div>';
+    return;
+  }
+
+  var icons = { birthday:"🎂", confirm:"⏰", payroll:"💰", document:"📄", leave:"🌿", default:"🔔" };
+
+  list.innerHTML = notifs.map(function(n) {
+    var ic = icons[n.type] || icons.default;
+    return '<div class="notif-item' + (n.read ? "" : " notif-unread") + '" id="notif-' + n.id + '" onclick="markNotifRead(\'' + n.id + '\')">' +
+      '<div class="notif-item-icon">' + ic + '</div>' +
+      '<div class="notif-item-body">' +
+        '<div class="notif-item-title">' + n.title + '</div>' +
+        '<div class="notif-item-text">' + n.body + '</div>' +
+        '<div class="notif-item-time">' + timeAgo(n.ts) + '</div>' +
+      '</div>' +
+      (n.read ? '' : '<div class="notif-unread-dot"></div>') +
+    '</div>';
+  }).join("");
+}
+
+function markNotifRead(id) {
+  var notifs = getNotifications() || [];
+  notifs = notifs.map(function(n) { return n.id === id ? { ...n, read: true } : n; });
+  saveNotifications(notifs);
+  renderNotifPanel();
+  updateNotifBadge();
+}
+
+function markAllNotifRead() {
+  var notifs = (getNotifications() || []).map(function(n) { return { ...n, read: true }; });
+  saveNotifications(notifs);
+  renderNotifPanel();
+  updateNotifBadge();
+}
+
+function clearAllNotif() {
+  saveNotifications([]);
+  renderNotifPanel();
+  updateNotifBadge();
+}
+
+
+/* ══════════════════════════════
+   DATE RANGE PICKER
+══════════════════════════════ */
+var _currentDateRange = "thisYear";
+
+function initDateRangePicker() {
+  var drp = document.getElementById("dateRangePicker");
+  if (!drp) return;
+
+  drp.querySelectorAll(".drp-btn[data-range]").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var range = this.dataset.range;
+      drp.querySelectorAll(".drp-btn").forEach(function(b) { b.classList.remove("active"); });
+      this.classList.add("active");
+      var customWrap = document.getElementById("drpCustom");
+      if (range === "custom") {
+        if (customWrap) customWrap.style.display = "flex";
+        return;
+      }
+      if (customWrap) customWrap.style.display = "none";
+      _currentDateRange = range;
+      _applyDateRange(range, null, null);
+    });
+  });
+}
+
+function applyCustomDateRange() {
+  var from = document.getElementById("drpFrom").value;
+  var to   = document.getElementById("drpTo").value;
+  if (!from || !to) { return; }
+  _currentDateRange = "custom";
+  _applyDateRange("custom", from, to);
+  /* Visual feedback */
+  var btn = document.querySelector('.drp-btn[data-range="custom"]');
+  if (btn) btn.textContent = from.slice(5) + " – " + to.slice(5);
+}
+
+function _applyDateRange(range, from, to) {
+  /* Update chart subtitles to reflect selected range */
+  var fyLabel = range === "lastYear" ? "FY 2024-25" :
+                range === "custom"   ? (from + " to " + to) :
+                                       "FY 2025-26";
+  var subEls = document.querySelectorAll(".cc-sub");
+  subEls.forEach(function(el) {
+    if (el.textContent.includes("FY") || el.textContent.includes("Financial")) {
+      el.textContent = fyLabel;
+    }
+  });
+
+  /* Show a subtle toast */
+  if (typeof showDashToast === "function") {
+    showDashToast("Charts updated for " + fyLabel, "info");
+  }
+}
+
+function showDashToast(msg, type) {
+  var old = document.getElementById("dashToast");
+  if (old) old.remove();
+  var bg = type === "success" ? "#10B981" : type === "error" ? "#EF4444" : "#7C3AED";
+  var toast = document.createElement("div");
+  toast.id = "dashToast";
+  toast.style.cssText = "position:fixed;bottom:80px;right:24px;z-index:9999;background:" + bg + ";color:white;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.2);font-family:var(--font);transition:opacity .3s;";
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.style.opacity = "0"; setTimeout(function() { toast.remove(); }, 300); }, 2500);
 }
