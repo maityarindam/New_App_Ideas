@@ -74,17 +74,21 @@
           <span class="topbar-brand-name">PayNest</span>
         </div>
         <div class="topbar-breadcrumb">
+          <!-- Part 1: Settings parent link -->
           <a class="topbar-crumb-parent" href="settings.html">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Settings
           </a>
+          <!-- Separator -->
           <span class="topbar-crumb-sep">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </span>
+          <!-- Part 2: Masters (current) with dropdown -->
           <span class="topbar-page-select" id="pageSelectBtn">
             Masters
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </span>
+          <!-- Dropdown — shows main nav + settings sub-items -->
           <div class="page-dropdown" id="pageDropdown">
             <a class="pd-item" href="dashboard.html">⊞ Dashboard</a>
             <a class="pd-item" href="employees.html">👥 Employees</a>
@@ -92,7 +96,21 @@
             <a class="pd-item" href="#">📅 Attendance</a>
             <a class="pd-item" href="#">🌿 Leave</a>
             <a class="pd-item" href="#">📊 Reports</a>
-            <a class="pd-item active" href="settings.html">⚙️ Settings</a>
+            <a class="pd-item" href="settings.html">⚙️ Settings</a>
+            <div class="pd-divider"></div>
+            <div class="pd-section-label">Settings</div>
+            <a class="pd-item pd-sub active" href="masters.html">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+              Masters
+            </a>
+            <a class="pd-item pd-sub pd-soon" href="#">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Company Profile
+            </a>
+            <a class="pd-item pd-sub pd-soon" href="#">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              Users &amp; Roles
+            </a>
           </div>
         </div>
       </div>
